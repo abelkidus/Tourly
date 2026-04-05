@@ -1,0 +1,104 @@
+@import url("https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+.programs {
+  background: #f7f7f2;
+  padding: 80px 60px;
+}
+
+.program-row {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 48px;
+  align-items: center;
+  margin-bottom: 64px;
+}
+
+.program-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.program-intro {
+  max-width: 280px;
+}
+
+.program-script {
+  margin: 0 0 10px;
+  color: #7d9154;
+  font-family: "Kaushan Script", cursive;
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.program-intro h2 {
+  margin: 0 0 20px;
+  color: #2d2d2d;
+  font-family: "Montserrat", sans-serif;
+  font-size: 2.35rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.program-intro p:not(.program-script) {
+  margin: 0 0 28px;
+  color: #5f615b;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+.program-intro a {
+  color: #2d2d2d;
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.program-intro a:hover {
+  color: #7d9154;
+}
+
+.program-card {
+  height: 420px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: end;
+  padding: 24px;
+  color: white;
+  font-family: "Montserrat", sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+.program-cards #australia {
+  background-image: url("../assets/images/australia.jpg");
+}
+.program-cards #japan {
+  background-image: url("../assets/images/japan.jpg");
+}
+.program-cards #china {
+  background-image: url("../assets/images/china.jpg");
+}
+.program-cards #germany {
+  background-image: url("../assets/images/germany.jpg");
+}
+
+.program-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.1));
+}
+
+.program-card > * {
+  position: relative;
+  z-index: 1;
+}

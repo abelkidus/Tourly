@@ -90,6 +90,18 @@
 .program-cards #germany {
   background-image: url("../assets/images/germany.jpg");
 }
+.program-cards #ethiopia {
+  background-image: url("../assets/images/ethiopia.jpg");
+}
+.program-cards #tanzania {
+  background-image: url("../assets/images/tanzania.jpg");
+}
+.program-cards #southAfrica {
+  background-image: url("../assets/images/southAfrica.jpg");
+}
+.program-cards #ghana {
+  background-image: url("../assets/images/ghana.jpg");
+}
 
 .program-card::before {
   content: "";

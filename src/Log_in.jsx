@@ -28,7 +28,7 @@ function Log_in() {
       if (response.ok) {
         localStorage.setItem("tourlyUser", JSON.stringify(data.user));
         alert(data.message);
-        navigate("/welcome", { state: { user: data.user } });
+        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome", { state: { user: data.user } });
       } else {
         alert(data.message || "Google login failed");
       }
@@ -60,7 +60,7 @@ function Log_in() {
       if (response.ok) {
         localStorage.setItem("tourlyUser", JSON.stringify(data.user));
         alert(data.message);
-        navigate("/welcome", { state: { user: data.user } });
+        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome", { state: { user: data.user } });
       } else {
         alert(data.message);
       }

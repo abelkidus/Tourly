@@ -50,9 +50,9 @@ app.post("/users/signup", signupValidationRules, validateSignup, async (req, res
 
     await pool.query(
       `INSERT INTO users 
-      (full_name, username, phone, email, address, birth_date, password_hash)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [fullName, username, phone, email, address, birthDate, passwordHash],
+  (full_name, username, phone, email, address, birth_date, password_hash, role)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [fullName, username, phone, email, address, birthDate, passwordHash, "user"],
     );
 
     res.status(201).json({ message: "User registered successfully" });
@@ -90,6 +90,7 @@ app.post("/users/login", async (req, res) => {
         fullName: user.full_name,
         username: user.username,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -134,6 +135,7 @@ app.post("/users/google-login", async (req, res) => {
         fullName: user.full_name,
         username: user.username,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -150,6 +152,41 @@ app.get("/destinations", async (req, res) => {
   } catch (error) {
     console.error("Fetch destinations error:", error);
     res.status(500).json({ message: "Server error while fetching destinations" });
+  }
+});
+
+app.post("/admin/destinations", async (req, res) => {
+  try {
+    const { userId, name, category, description, imageKey } = req.body;
+
+    if (!userId || !name || !category || !description || !imageKey) {
+      return res.status(400).json({ message: "All destination fields are required" });
+    }
+
+    const adminCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
+
+    if (adminCheck.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (adminCheck.rows[0].role !== "admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO destinations (name, category, description, image_key)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, category, description, image_key`,
+      [name, category, description, imageKey],
+    );
+
+    return res.status(201).json({
+      message: "Destination added successfully",
+      destination: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Add destination error:", error);
+    return res.status(500).json({ message: "Server error while adding destination" });
   }
 });
 

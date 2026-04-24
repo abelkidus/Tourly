@@ -5,6 +5,7 @@ import Sign_up from "./Sign_up";
 import Log_in from "./Log_in";
 import Welcome from "./welcome";
 import Booking from "./Booking";
+import AdminDashboard from "./AdminDashboard";
 
 function HomePage() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/Log_in" element={<Log_in />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/booking" element={<Booking />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );

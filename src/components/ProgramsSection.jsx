@@ -5,9 +5,9 @@ function ProgramsSection() {
     <section className="programs">
       <div className="program-row">
         <div className="program-intro">
-          <p className="program-script">Working Holiday</p>
+          <p className="program-script">Worldwide</p>
           <h2>PROGRAMS</h2>
-          <p>Working Holidays around the World! In Japan, China, Germany. Try something different!</p>
+          <p>Explore the world!</p>
           <a href="/">Explore all programs</a>
         </div>
 
@@ -29,17 +29,25 @@ function ProgramsSection() {
 
       <div className="program-row program-row--alt">
         <div className="program-intro">
-          <p className="program-script">Volunteering</p>
+          <p className="program-script">Africa</p>
           <h2>ABROAD</h2>
-          <p>A wide range of meaningful volunteering options with charitable organizations worldwide!</p>
+          <p>Enjoy your Holidays in Africa!</p>
           <a href="/">Explore all programs</a>
         </div>
 
         <div className="program-cards">
-          <article className="program-card">Tanzania</article>
-          <article className="program-card">Vietnam</article>
-          <article className="program-card">Nepal</article>
-          <article className="program-card">Nicaragua</article>
+          <article className="program-card" id="ethiopia">
+            Ethiopia
+          </article>
+          <article className="program-card" id="tanzania">
+            Tanzania
+          </article>
+          <article className="program-card" id="southAfrica">
+            South Africa
+          </article>
+          <article className="program-card" id="ghana">
+            Ghana
+          </article>
         </div>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./navbar.css";
 
 function Navbar() {
@@ -20,7 +21,9 @@ function Navbar() {
         </li>
       </ul>
 
-      <button className="navbar__button">Sign-in</button>
+      <Link to="/Log_in" className="navbar__button">
+        Sign-in
+      </Link>
     </nav>
   );
 }

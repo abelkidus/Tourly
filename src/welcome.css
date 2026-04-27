@@ -14,6 +14,35 @@
   text-align: center;
 }
 
+.welcome__actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 18px;
+}
+
+.welcome__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(47, 108, 96, 0.2);
+  background: rgba(247, 242, 232, 0.9);
+  color: #17352f;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.welcome__home:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(23, 53, 47, 0.12);
+  background: #ffffff;
+}
+
 .welcome__eyebrow {
   margin: 0 0 12px;
   font-size: 0.9rem;
@@ -63,5 +92,9 @@
 @media (max-width: 640px) {
   .welcome__panel {
     padding: 28px 22px;
+  }
+
+  .welcome__actions {
+    margin-bottom: 16px;
   }
 }

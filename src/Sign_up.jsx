@@ -44,6 +44,11 @@ function Sign_up() {
   return (
     <section className="signup">
       <div className="signup__panel">
+        <div className="signup__actions">
+          <Link className="signup__home" to="/">
+            Back to home
+          </Link>
+        </div>
         <p className="signup__eyebrow">Create account</p>
         <h2 className="signup__title">Join and start planning your next journey.</h2>
         <p className="signup__subtitle">Build your Tourly account to save destinations, organize bookings, and keep your travel ideas in one place.</p>

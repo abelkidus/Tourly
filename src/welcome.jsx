@@ -10,6 +10,11 @@ function Welcome() {
   return (
     <section className="welcome">
       <div className="welcome__panel">
+        <div className="welcome__actions">
+          <Link className="welcome__home" to="/">
+            Back to home
+          </Link>
+        </div>
         <p className="welcome__eyebrow">Tourly Dashboard</p>
         <h1 className="welcome__title">{loggedInUser ? `Welcome, ${loggedInUser}` : "Welcome"}</h1>
         <p className="welcome__subtitle">

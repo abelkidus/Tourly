@@ -73,6 +73,11 @@ function Log_in() {
   return (
     <section className="login">
       <div className="login__panel">
+        <div className="login__actions">
+          <Link className="login__home" to="/">
+            Back to home
+          </Link>
+        </div>
         <p className="login__eyebrow">Welcome back</p>
         <h2 className="login__title">Pick up your travel plans where you left off.</h2>
         <p className="login__subtitle">Sign in to access saved itineraries, personalized destination ideas, and your Tourly account details.</p>

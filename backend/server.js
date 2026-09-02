@@ -215,6 +215,37 @@ app.post("/bookings", async (req, res) => {
   }
 });
 
+app.get("/bookings", async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const result = await pool.query(
+      `SELECT
+        bookings.id,
+        bookings.travelers_count,
+        bookings.travel_date,
+        destinations.name AS destination_name,
+        destinations.category AS destination_category,
+        destinations.description AS destination_description,
+        destinations.image_key AS destination_image_key
+       FROM bookings
+       JOIN destinations ON bookings.destination_id = destinations.id
+       WHERE bookings.user_id = $1
+       ORDER BY bookings.travel_date ASC, bookings.id ASC`,
+      [userId],
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Fetch bookings error:", error);
+    res.status(500).json({ message: "Server error while fetching bookings" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

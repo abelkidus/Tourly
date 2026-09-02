@@ -20,9 +20,14 @@ function Welcome() {
         <p className="welcome__subtitle">
           Your account is ready. Start your next trip by choosing one of the destinations you added to the database.
         </p>
-        <Link className="welcome__button" to="/booking" state={{ user }}>
-          Book now
-        </Link>
+        <div className="welcome__cta">
+          <Link className="welcome__button" to="/booking" state={{ user }}>
+            Book now
+          </Link>
+          <Link className="welcome__button welcome__button--secondary" to="/bookings" state={{ user }}>
+            View bookings
+          </Link>
+        </div>
       </div>
     </section>
   );

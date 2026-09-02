@@ -66,11 +66,18 @@
   color: #3d5954;
 }
 
+.welcome__cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
 .welcome__button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 28px;
   padding: 14px 28px;
   border-radius: 999px;
   background: #17352f;
@@ -89,6 +96,15 @@
   background: #224b42;
 }
 
+.welcome__button--secondary {
+  background: #dfeae6;
+  color: #17352f;
+}
+
+.welcome__button--secondary:hover {
+  background: #cfddd8;
+}
+
 @media (max-width: 640px) {
   .welcome__panel {
     padding: 28px 22px;
@@ -96,5 +112,13 @@
 
   .welcome__actions {
     margin-bottom: 16px;
+  }
+
+  .welcome__cta {
+    flex-direction: column;
+  }
+
+  .welcome__button {
+    width: 100%;
   }
 }

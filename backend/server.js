@@ -14,31 +14,49 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20,
+
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "https://tourly-nu.vercel.app",
+];
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { message: "Too many authentication attempts, please try again after 15 minutes." },
 });
 
-app.use(limiter);
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 150,
+});
+
+app.use(apiLimiter);
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   }),
 );
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//   }),
-// );
-app.use(cors());
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Blocked by CORS policy"));
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Auth server is running");
 });
 
-app.post("/users/signup", signupValidationRules, validateSignup, async (req, res) => {
+app.post("/users/signup", authLimiter, signupValidationRules, validateSignup, async (req, res) => {
   try {
     const { fullName, username, phone, email, address, birthDate, password } = req.body;
 
@@ -64,7 +82,7 @@ app.post("/users/signup", signupValidationRules, validateSignup, async (req, res
   }
 });
 
-app.post("/users/login", async (req, res) => {
+app.post("/users/login", authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -108,7 +126,7 @@ app.post("/users/login", async (req, res) => {
   }
 });
 
-app.post("/users/google-login", async (req, res) => {
+app.post("/users/google-login", authLimiter, async (req, res) => {
   try {
     const { credential } = req.body;
 

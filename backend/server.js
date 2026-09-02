@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { signupValidationRules, validateSignup } = require("./validator");
+const { authenticateToken, requireAdmin } = require("./middleware/auth");
 const { OAuth2Client } = require("google-auth-library");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -192,22 +193,12 @@ app.get("/destinations", async (req, res) => {
   }
 });
 
-app.post("/admin/destinations", async (req, res) => {
+app.post("/admin/destinations", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { userId, name, category, description, imageKey } = req.body;
+    const { name, category, description, imageKey } = req.body;
 
-    if (!userId || !name || !category || !description || !imageKey) {
+    if (!name || !category || !description || !imageKey) {
       return res.status(400).json({ message: "All destination fields are required" });
-    }
-
-    const adminCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
-
-    if (adminCheck.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (adminCheck.rows[0].role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
     }
 
     const result = await pool.query(
@@ -227,11 +218,11 @@ app.post("/admin/destinations", async (req, res) => {
   }
 });
 
-app.post("/bookings", async (req, res) => {
+app.post("/bookings", authenticateToken, async (req, res) => {
   try {
-    const { userId, destinationId, travelersCount, travelDate } = req.body;
+    const { destinationId, travelersCount, travelDate } = req.body;
 
-    if (!userId || !destinationId || !travelersCount || !travelDate) {
+    if (!destinationId || !travelersCount || !travelDate) {
       return res.status(400).json({ message: "All booking fields are required" });
     }
 
@@ -239,7 +230,7 @@ app.post("/bookings", async (req, res) => {
       `INSERT INTO bookings (user_id, destination_id, travelers_count, travel_date)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [userId, destinationId, travelersCount, travelDate],
+      [req.user.id, destinationId, travelersCount, travelDate],
     );
 
     res.status(201).json({
@@ -252,14 +243,8 @@ app.post("/bookings", async (req, res) => {
   }
 });
 
-app.get("/bookings", async (req, res) => {
+app.get("/bookings", authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.query;
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
     const result = await pool.query(
       `SELECT
         bookings.id,
@@ -273,7 +258,7 @@ app.get("/bookings", async (req, res) => {
        JOIN destinations ON bookings.destination_id = destinations.id
        WHERE bookings.user_id = $1
        ORDER BY bookings.travel_date ASC, bookings.id ASC`,
-      [userId],
+      [req.user.id],
     );
 
     res.status(200).json(result.rows);

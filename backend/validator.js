@@ -26,7 +26,6 @@ const signupValidationRules = [
   body("birthDate").notEmpty().withMessage("Birth date is required").isISO8601().withMessage("Birth date must be a valid date"),
 
   body("password")
-    .trim()
     .notEmpty()
     .withMessage("Password is required")
     .isLength({ min: 8 })

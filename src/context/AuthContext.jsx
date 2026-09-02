@@ -19,13 +19,31 @@ export const AuthProvider = ({ children }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const login = (authToken, userData) => {
+    setToken(authToken);
+    setUser(userData);
+    localStorage.setItem("tourly_token", authToken);
+    localStorage.setItem("tourly_user", JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem("tourly_token");
+    localStorage.removeItem("tourly_user");
+  };
+
+  const isAuthenticated = Boolean(token && user);
+  const isAdmin = user?.role === "admin";
+
   const value = {
     user,
-    setUser,
     token,
-    setToken,
     isLoading,
-    setIsLoading,
+    isAuthenticated,
+    isAdmin,
+    login,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

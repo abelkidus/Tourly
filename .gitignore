@@ -30,3 +30,6 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
+
+
+PROJECT_AUDIT.md

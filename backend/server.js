@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { signupValidationRules, validateSignup } = require("./validator");
 const { OAuth2Client } = require("google-auth-library");
@@ -83,8 +84,15 @@ app.post("/users/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid username or password" });
     }
 
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+
     res.status(200).json({
       message: "Login successful",
+      token,
       user: {
         id: user.id,
         fullName: user.full_name,
@@ -119,17 +127,46 @@ app.post("/users/google-login", async (req, res) => {
     }
 
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [payload.email]);
+    let user;
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        message: "No account found with this Google email. Please sign up first.",
-      });
+      const baseUsername = payload.email
+        .split("@")[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, "")
+        .slice(0, 20) || "user";
+
+      let username = baseUsername;
+      const usernameCheck = await pool.query("SELECT id FROM users WHERE username = $1", [username]);
+
+      if (usernameCheck.rows.length > 0) {
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        username = `${baseUsername.slice(0, 15)}_${randomSuffix}`;
+      }
+
+      const fullName = payload.name || "Google User";
+
+      const insertResult = await pool.query(
+        `INSERT INTO users (full_name, username, email, role)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, full_name, username, email, role`,
+        [fullName, username, payload.email, "user"],
+      );
+
+      user = insertResult.rows[0];
+    } else {
+      user = result.rows[0];
     }
 
-    const user = result.rows[0];
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
 
     return res.status(200).json({
       message: "Google login successful",
+      token,
       user: {
         id: user.id,
         fullName: user.full_name,

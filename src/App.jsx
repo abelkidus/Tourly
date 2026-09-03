@@ -7,6 +7,8 @@ import Welcome from "./welcome";
 import Booking from "./Booking";
 import BookingList from "./BookingList";
 import AdminDashboard from "./AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 function HomePage() {
   return (
@@ -24,13 +26,42 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/Sign_up" element={<Sign_up />} />
         <Route path="/Log_in" element={<Log_in />} />
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/bookings" element={<BookingList />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route
+          path="/welcome"
+          element={
+            <ProtectedRoute>
+              <Welcome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/booking"
+          element={
+            <ProtectedRoute>
+              <Booking />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bookings"
+          element={
+            <ProtectedRoute>
+              <BookingList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+

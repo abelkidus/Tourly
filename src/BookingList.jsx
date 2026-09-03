@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import "./bookingList.css";
 
 function BookingList() {
-  const location = useLocation();
-  const savedUser = JSON.parse(localStorage.getItem("tourlyUser") || "null");
-  const user = location.state?.user || savedUser;
+  const { user, token } = useAuth();
   const displayName = user?.fullName || user?.username;
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -15,14 +14,18 @@ function BookingList() {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      if (!user?.id) {
+      if (!token) {
         setError("You need to log in before viewing bookings.");
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`${API_URL}/bookings?userId=${user.id}`);
+        const response = await fetch(`${API_URL}/bookings`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
 
         if (!response.ok) {
@@ -38,18 +41,27 @@ function BookingList() {
     };
 
     fetchBookings();
-  }, [API_URL, user?.id]);
+  }, [API_URL, token]);
 
   const formatDate = (dateValue) => {
     if (!dateValue) {
       return "Date unavailable";
     }
 
-    return new Intl.DateTimeFormat("en", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(new Date(dateValue));
+    const cleanDate = typeof dateValue === "string" ? dateValue.split("T")[0] : dateValue;
+    const [year, month, day] = cleanDate.split("-");
+
+    if (year && month && day) {
+      const utcDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+      return new Intl.DateTimeFormat("en", {
+        timeZone: "UTC",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(utcDate);
+    }
+
+    return cleanDate;
   };
 
   return (
@@ -65,7 +77,7 @@ function BookingList() {
         {!loading && !error && bookings.length === 0 && (
           <div className="bookings__empty">
             <p className="bookings__status">You do not have any bookings yet.</p>
-            <Link className="bookings__button" to="/booking" state={{ user }}>
+            <Link className="bookings__button" to="/booking">
               Book now
             </Link>
           </div>
@@ -92,10 +104,10 @@ function BookingList() {
         )}
 
         <div className="bookings__actions">
-          <Link className="bookings__button" to="/booking" state={{ user }}>
+          <Link className="bookings__button" to="/booking">
             Book another trip
           </Link>
-          <Link className="bookings__button bookings__button--secondary" to="/welcome" state={{ user }}>
+          <Link className="bookings__button bookings__button--secondary" to="/welcome">
             Back to welcome
           </Link>
         </div>

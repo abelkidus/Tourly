@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
+import { useAuth } from "./context/AuthContext";
 import "./Log_in.css";
 
 function Log_in() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -11,7 +14,7 @@ function Log_in() {
       const credential = credentialResponse?.credential;
 
       if (!credential) {
-        alert("Google login failed: missing credential");
+        toast.error("Google login failed: missing credential");
         return;
       }
 
@@ -26,15 +29,15 @@ function Log_in() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("tourlyUser", JSON.stringify(data.user));
-        alert(data.message);
-        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome", { state: { user: data.user } });
+        login(data.token, data.user);
+        toast.success(data.message || "Google login successful");
+        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome");
       } else {
-        alert(data.message || "Google login failed");
+        toast.error(data.message || "Google login failed");
       }
     } catch (error) {
       console.error("Google login error:", error);
-      alert("Could not connect to the server for Google login");
+      toast.error("Could not connect to the server for Google login");
     }
   };
 
@@ -58,15 +61,15 @@ function Log_in() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("tourlyUser", JSON.stringify(data.user));
-        alert(data.message);
-        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome", { state: { user: data.user } });
+        login(data.token, data.user);
+        toast.success(data.message || "Login successful");
+        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome");
       } else {
-        alert(data.message);
+        toast.error(data.message || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("Could not connect to the server");
+      toast.error("Could not connect to the server");
     }
   };
 
@@ -108,8 +111,8 @@ function Log_in() {
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => {
-              console.log("Loggin failed");
-              alert("Google login failed. Please try again.");
+              console.error("Google login failed");
+              toast.error("Google login failed. Please try again.");
             }}
           />
         </div>

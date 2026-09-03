@@ -30,7 +30,7 @@ function Log_in() {
 
       if (response.ok) {
         login(data.token, data.user);
-        toast.success(data.message || "Google login successful");
+        toast.success("Welcome, " + (data.user.fullName || data.user.username || "Traveler"));
         navigate(data.user.role === "admin" ? "/dashboard" : "/welcome");
       } else {
         toast.error(data.message || "Google login failed");

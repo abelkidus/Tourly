@@ -114,3 +114,50 @@
   position: relative;
   z-index: 1;
 }
+
+.programs__status {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.2rem;
+  color: #5f615b;
+  padding: 40px 0;
+}
+
+.programs__status--error {
+  color: #c53030;
+}
+
+.program-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.program-card__category {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ccfbb8;
+}
+
+.program-card__name {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+.program-card__desc {
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+

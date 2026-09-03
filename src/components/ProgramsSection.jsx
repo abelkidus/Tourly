@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getDestinationImage } from "../utils/imageMapper";
 import "./programsSection.css";
 
@@ -7,6 +7,7 @@ function ProgramsSection() {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -77,6 +78,13 @@ function ProgramsSection() {
                       <span className="program-card__category">{dest.category}</span>
                       <h3 className="program-card__name">{dest.name}</h3>
                       {dest.description && <p className="program-card__desc">{dest.description}</p>}
+                      <button
+                        className="program-card__book-btn"
+                        onClick={() => navigate(`/booking?destinationId=${dest.id}`)}
+                        type="button"
+                      >
+                        Book Now
+                      </button>
                     </div>
                   </article>
                 );

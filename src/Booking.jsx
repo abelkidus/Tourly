@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import "./booking.css";
 
 function Booking() {
   const { user, token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const preselectedDestinationId = searchParams.get("destinationId");
   const displayName = user?.fullName || user?.username;
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -14,7 +16,7 @@ function Booking() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    destinationId: "",
+    destinationId: preselectedDestinationId || "",
     travelersCount: 1,
     travelDate: "",
   });
@@ -31,9 +33,10 @@ function Booking() {
 
         setDestinations(data);
         if (data.length > 0) {
+          const match = preselectedDestinationId && data.find((d) => String(d.id) === String(preselectedDestinationId));
           setFormData((current) => ({
             ...current,
-            destinationId: String(data[0].id),
+            destinationId: match ? String(match.id) : current.destinationId || String(data[0].id),
           }));
         }
       } catch (err) {
@@ -44,7 +47,7 @@ function Booking() {
     };
 
     fetchDestinations();
-  }, [API_URL]);
+  }, [API_URL, preselectedDestinationId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

@@ -161,3 +161,27 @@
   overflow: hidden;
 }
 
+.program-card__book-btn {
+  margin-top: 12px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #17352f;
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.program-card__book-btn:hover {
+  background: #7d9154;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+

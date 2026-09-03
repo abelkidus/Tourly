@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import "./bookingList.css";
 
@@ -42,6 +43,31 @@ function BookingList() {
 
     fetchBookings();
   }, [API_URL, token]);
+
+  const handleCancelBooking = async (bookingId) => {
+    const confirmed = window.confirm("Are you sure you want to cancel this booking?");
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to cancel booking");
+      }
+
+      toast.success("Booking cancelled");
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+    } catch (err) {
+      toast.error(err.message || "Could not cancel booking");
+    }
+  };
 
   const formatDate = (dateValue) => {
     if (!dateValue) {
@@ -97,6 +123,13 @@ function BookingList() {
                   <span>
                     {booking.travelers_count} {Number(booking.travelers_count) === 1 ? "traveler" : "travelers"}
                   </span>
+                  <button
+                    className="bookings__cancel-btn"
+                    onClick={() => handleCancelBooking(booking.id)}
+                    type="button"
+                  >
+                    Cancel Trip
+                  </button>
                 </div>
               </article>
             ))}

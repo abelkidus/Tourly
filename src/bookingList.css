@@ -96,6 +96,30 @@
   text-align: right;
 }
 
+.bookings__cancel-btn {
+  margin-top: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(224, 82, 82, 0.4);
+  border-radius: 999px;
+  background: #fff5f5;
+  color: #c53030;
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  justify-self: end;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.bookings__cancel-btn:hover {
+  background: #c53030;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 .bookings__actions {
   display: flex;
   flex-wrap: wrap;

@@ -286,6 +286,26 @@ app.get("/bookings", authenticateToken, async (req, res) => {
   }
 });
 
+app.delete("/bookings/:id", authenticateToken, async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+
+    const result = await pool.query(
+      "DELETE FROM bookings WHERE id = $1 AND user_id = $2 RETURNING id",
+      [bookingId, req.user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Booking not found or unauthorized" });
+    }
+
+    res.status(200).json({ message: "Booking cancelled successfully" });
+  } catch (error) {
+    console.error("Cancel booking error:", error);
+    res.status(500).json({ message: "Server error while cancelling booking" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

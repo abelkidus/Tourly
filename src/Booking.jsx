@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "./context/AuthContext";
 import "./booking.css";
 
 function Booking() {
-  const location = useLocation();
-  const savedUser = JSON.parse(localStorage.getItem("tourlyUser") || "null");
-  const user = location.state?.user || savedUser;
+  const { user, token } = useAuth();
   const displayName = user?.fullName || user?.username;
 
   const API_URL = import.meta.env.VITE_API_URL;
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [submitError, setSubmitError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     destinationId: "",
@@ -50,8 +48,6 @@ function Booking() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setSubmitError("");
-    setSuccessMessage("");
     setFormData((current) => ({
       ...current,
       [name]: value,
@@ -60,24 +56,16 @@ function Booking() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (!user?.id) {
-      setSubmitError("You need to log in before making a booking.");
-      return;
-    }
-
     setIsSubmitting(true);
-    setSubmitError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(`${API_URL}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: user.id,
           destinationId: Number(formData.destinationId),
           travelersCount: Number(formData.travelersCount),
           travelDate: formData.travelDate,
@@ -90,14 +78,14 @@ function Booking() {
         throw new Error(data.message || "Failed to create booking");
       }
 
-      setSuccessMessage("Booking created successfully.");
+      toast.success("Trip booked successfully!");
       setFormData((current) => ({
         ...current,
         travelersCount: 1,
         travelDate: "",
       }));
     } catch (err) {
-      setSubmitError(err.message);
+      toast.error(err.message || "Failed to create booking");
     } finally {
       setIsSubmitting(false);
     }
@@ -170,13 +158,10 @@ function Booking() {
               <button className="booking__button" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : "Continue Booking"}
               </button>
-              <Link className="booking__button booking__button--secondary" to="/welcome" state={{ user }}>
+              <Link className="booking__button booking__button--secondary" to="/welcome">
                 Back to welcome
               </Link>
             </div>
-
-            {submitError && <p className="booking__status booking__status--error">{submitError}</p>}
-            {successMessage && <p className="booking__status booking__status--success">{successMessage}</p>}
           </form>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./Sign_up.css";
 
 function Sign_up() {
@@ -30,14 +31,20 @@ function Sign_up() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
+        toast.success("Account created! Please log in.");
         navigate("/Log_in");
       } else {
-        alert(data.message);
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          data.errors.forEach((err) => {
+            toast.error(err.msg || err.message);
+          });
+        } else {
+          toast.error(data.message || "Registration failed");
+        }
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Could not connect to the server");
+      toast.error("Could not connect to the server");
     }
   };
 

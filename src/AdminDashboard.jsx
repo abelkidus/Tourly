@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import "./adminDashboard.css";
 
@@ -14,8 +15,6 @@ function AdminDashboard() {
     description: "",
     imageKey: "",
   });
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignOut = () => {
@@ -25,8 +24,6 @@ function AdminDashboard() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setError("");
-    setSuccessMessage("");
     setFormData((current) => ({
       ...current,
       [name]: value,
@@ -36,8 +33,6 @@ function AdminDashboard() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(`${API_URL}/admin/destinations`, {
@@ -60,7 +55,7 @@ function AdminDashboard() {
         throw new Error(data.message || "Failed to add destination");
       }
 
-      setSuccessMessage("Destination added successfully.");
+      toast.success("Destination created!");
       setFormData({
         name: "",
         category: "",
@@ -68,7 +63,7 @@ function AdminDashboard() {
         imageKey: "",
       });
     } catch (submitError) {
-      setError(submitError.message);
+      toast.error(submitError.message || "Failed to add destination");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,9 +131,6 @@ function AdminDashboard() {
               Back home
             </Link>
           </div>
-
-          {error && <p className="admin-dashboard__status admin-dashboard__status--error">{error}</p>}
-          {successMessage && <p className="admin-dashboard__status admin-dashboard__status--success">{successMessage}</p>}
         </form>
       </div>
     </section>

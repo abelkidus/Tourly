@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import "./adminDashboard.css";
 
 function AdminDashboard() {
-  const location = useLocation();
-  const savedUser = JSON.parse(localStorage.getItem("tourlyUser") || "null");
-  const user = location.state?.user || savedUser;
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -17,13 +18,10 @@ function AdminDashboard() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!user) {
-    return <Navigate to="/Log_in" replace />;
-  }
-
-  if (user.role !== "admin") {
-    return <Navigate to="/welcome" replace state={{ user }} />;
-  }
+  const handleSignOut = () => {
+    logout();
+    navigate("/");
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -46,9 +44,9 @@ function AdminDashboard() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: user.id,
           name: formData.name,
           category: formData.category,
           description: formData.description,
@@ -79,10 +77,19 @@ function AdminDashboard() {
   return (
     <section className="admin-dashboard">
       <div className="admin-dashboard__panel">
+        <div className="admin-dashboard__actions-top">
+          <Link className="admin-dashboard__button admin-dashboard__button--secondary" to="/">
+            Back to home
+          </Link>
+          <button className="admin-dashboard__button admin-dashboard__button--secondary" onClick={handleSignOut} type="button">
+            Sign Out
+          </button>
+        </div>
+
         <p className="admin-dashboard__eyebrow">Admin Dashboard</p>
         <h1 className="admin-dashboard__title">Manage Tourly destinations</h1>
         <p className="admin-dashboard__subtitle">
-          {user.fullName || user.username}, add new places here for travelers to discover and book.
+          {user?.fullName || user?.username || "Admin"}, add new places here for travelers to discover and book.
         </p>
 
         <form className="admin-dashboard__form" onSubmit={handleSubmit}>

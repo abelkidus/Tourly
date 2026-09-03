@@ -16,7 +16,8 @@
 
 .welcome__actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 18px;
 }
 
@@ -30,6 +31,8 @@
   background: rgba(247, 242, 232, 0.9);
   color: #17352f;
   font-weight: 700;
+  font: inherit;
+  cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,

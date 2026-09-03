@@ -53,3 +53,39 @@
   background-color: #115e59;
   color: white;
 }
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__user-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar__greeting {
+  color: #eafde2;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.navbar__link-item {
+  color: #eafde2;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.navbar__link-item:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.navbar__button--signout {
+  width: auto;
+  min-width: 95px;
+}
+

@@ -236,6 +236,35 @@ app.post("/admin/destinations", authenticateToken, requireAdmin, async (req, res
   }
 });
 
+app.delete("/admin/destinations/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const destinationId = req.params.id;
+
+    const bookingCheck = await pool.query(
+      "SELECT id FROM bookings WHERE destination_id = $1 LIMIT 1",
+      [destinationId],
+    );
+
+    if (bookingCheck.rows.length > 0) {
+      return res.status(400).json({ message: "Cannot delete destination with active bookings" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM destinations WHERE id = $1 RETURNING id",
+      [destinationId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Destination not found" });
+    }
+
+    res.status(200).json({ message: "Destination deleted successfully" });
+  } catch (error) {
+    console.error("Delete destination error:", error);
+    res.status(500).json({ message: "Server error while deleting destination" });
+  }
+});
+
 app.post("/bookings", authenticateToken, async (req, res) => {
   try {
     const { destinationId, travelersCount, travelDate } = req.body;
@@ -244,11 +273,24 @@ app.post("/bookings", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "All booking fields are required" });
     }
 
+    const count = Number(travelersCount);
+    if (isNaN(count) || count < 1) {
+      return res.status(400).json({ message: "Travelers count must be at least 1" });
+    }
+
+    const bookingDate = new Date(travelDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isNaN(bookingDate.getTime()) || bookingDate < today) {
+      return res.status(400).json({ message: "Travel date cannot be in the past" });
+    }
+
     const result = await pool.query(
       `INSERT INTO bookings (user_id, destination_id, travelers_count, travel_date)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [req.user.id, destinationId, travelersCount, travelDate],
+      [req.user.id, destinationId, count, travelDate],
     );
 
     res.status(201).json({
@@ -283,6 +325,26 @@ app.get("/bookings", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Fetch bookings error:", error);
     res.status(500).json({ message: "Server error while fetching bookings" });
+  }
+});
+
+app.delete("/bookings/:id", authenticateToken, async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+
+    const result = await pool.query(
+      "DELETE FROM bookings WHERE id = $1 AND user_id = $2 RETURNING id",
+      [bookingId, req.user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Booking not found or unauthorized" });
+    }
+
+    res.status(200).json({ message: "Booking cancelled successfully" });
+  } catch (error) {
+    console.error("Cancel booking error:", error);
+    res.status(500).json({ message: "Server error while cancelling booking" });
   }
 });
 

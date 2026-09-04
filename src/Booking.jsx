@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import "./booking.css";
 
 function Booking() {
   const { user, token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const preselectedDestinationId = searchParams.get("destinationId");
   const displayName = user?.fullName || user?.username;
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -14,7 +16,7 @@ function Booking() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    destinationId: "",
+    destinationId: preselectedDestinationId || "",
     travelersCount: 1,
     travelDate: "",
   });
@@ -31,9 +33,10 @@ function Booking() {
 
         setDestinations(data);
         if (data.length > 0) {
+          const selectedId = preselectedDestinationId || data[0].id;
           setFormData((current) => ({
             ...current,
-            destinationId: String(data[0].id),
+            destinationId: String(selectedId),
           }));
         }
       } catch (err) {
@@ -44,7 +47,7 @@ function Booking() {
     };
 
     fetchDestinations();
-  }, [API_URL]);
+  }, [API_URL, preselectedDestinationId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -91,6 +94,8 @@ function Booking() {
     }
   };
 
+  const todayDate = new Date().toISOString().split("T")[0];
+
   return (
     <section className="booking">
       <div className="booking__panel">
@@ -133,6 +138,7 @@ function Booking() {
                 id="travelersCount"
                 name="travelersCount"
                 min="1"
+                max="20"
                 value={formData.travelersCount}
                 onChange={handleChange}
                 required
@@ -148,6 +154,7 @@ function Booking() {
                 type="date"
                 id="travelDate"
                 name="travelDate"
+                min={todayDate}
                 value={formData.travelDate}
                 onChange={handleChange}
                 required

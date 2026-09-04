@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import "./bookingList.css";
 
@@ -43,6 +44,31 @@ function BookingList() {
     fetchBookings();
   }, [API_URL, token]);
 
+  const handleCancelBooking = async (bookingId) => {
+    const confirmed = window.confirm("Are you sure you want to cancel this booking?");
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to cancel booking");
+      }
+
+      toast.success("Booking cancelled");
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+    } catch (err) {
+      toast.error(err.message || "Could not cancel booking");
+    }
+  };
+
   const formatDate = (dateValue) => {
     if (!dateValue) {
       return "Date unavailable";
@@ -71,15 +97,25 @@ function BookingList() {
         <h1 className="bookings__title">{displayName ? `${displayName}'s trips` : "Your trips"}</h1>
         <p className="bookings__subtitle">Review the destinations you have booked and the dates you are planning to travel.</p>
 
-        {loading && <p className="bookings__status">Loading bookings...</p>}
+        {loading && (
+          <div className="bookings__loading">
+            <div className="bookings__spinner"></div>
+            <p className="bookings__status">Loading your bookings...</p>
+          </div>
+        )}
         {error && <p className="bookings__status bookings__status--error">{error}</p>}
 
         {!loading && !error && bookings.length === 0 && (
           <div className="bookings__empty">
             <p className="bookings__status">You do not have any bookings yet.</p>
-            <Link className="bookings__button" to="/booking">
-              Book now
-            </Link>
+            <div className="bookings__empty-actions">
+              <Link className="bookings__button" to="/">
+                Browse Destinations
+              </Link>
+              <Link className="bookings__button bookings__button--secondary" to="/booking">
+                Book a trip
+              </Link>
+            </div>
           </div>
         )}
 
@@ -97,6 +133,13 @@ function BookingList() {
                   <span>
                     {booking.travelers_count} {Number(booking.travelers_count) === 1 ? "traveler" : "travelers"}
                   </span>
+                  <button
+                    className="bookings__cancel-btn"
+                    onClick={() => handleCancelBooking(booking.id)}
+                    type="button"
+                  >
+                    Cancel Trip
+                  </button>
                 </div>
               </article>
             ))}

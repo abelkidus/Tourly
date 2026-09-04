@@ -236,6 +236,35 @@ app.post("/admin/destinations", authenticateToken, requireAdmin, async (req, res
   }
 });
 
+app.delete("/admin/destinations/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const destinationId = req.params.id;
+
+    const bookingCheck = await pool.query(
+      "SELECT id FROM bookings WHERE destination_id = $1 LIMIT 1",
+      [destinationId],
+    );
+
+    if (bookingCheck.rows.length > 0) {
+      return res.status(400).json({ message: "Cannot delete destination with active bookings" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM destinations WHERE id = $1 RETURNING id",
+      [destinationId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Destination not found" });
+    }
+
+    res.status(200).json({ message: "Destination deleted successfully" });
+  } catch (error) {
+    console.error("Delete destination error:", error);
+    res.status(500).json({ message: "Server error while deleting destination" });
+  }
+});
+
 app.post("/bookings", authenticateToken, async (req, res) => {
   try {
     const { destinationId, travelersCount, travelDate } = req.body;

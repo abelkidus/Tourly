@@ -4,7 +4,7 @@ import Hero from "./Hero";
 
 function TopSection() {
   return (
-    <div className="top-section">
+    <div className="top-section" id="home">
       <Navbar />
       <Hero />
     </div>

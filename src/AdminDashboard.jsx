@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
+import { getDestinationImage } from "./utils/imageMapper";
 import "./adminDashboard.css";
 
 function AdminDashboard() {
@@ -9,6 +10,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
+  const [destinations, setDestinations] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -16,6 +18,23 @@ function AdminDashboard() {
     imageKey: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchDestinations = async () => {
+    try {
+      const response = await fetch(`${API_URL}/destinations`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setDestinations(data);
+      }
+    } catch (err) {
+      console.error("Failed to load destinations:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDestinations();
+  }, [API_URL]);
 
   const handleSignOut = () => {
     logout();
@@ -62,10 +81,35 @@ function AdminDashboard() {
         description: "",
         imageKey: "",
       });
+      fetchDestinations();
     } catch (submitError) {
       toast.error(submitError.message || "Failed to add destination");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteDestination = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this destination?")) return;
+
+    try {
+      const response = await fetch(`${API_URL}/admin/destinations/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete destination");
+      }
+
+      toast.success("Destination deleted!");
+      fetchDestinations();
+    } catch (err) {
+      toast.error(err.message || "Failed to delete destination");
     }
   };
 
@@ -132,6 +176,60 @@ function AdminDashboard() {
             </Link>
           </div>
         </form>
+
+        <div className="admin-dashboard__inventory">
+          <h2 className="admin-dashboard__section-title">Current Destinations ({destinations.length})</h2>
+          <div className="admin-dashboard__table-container">
+            <table className="admin-dashboard__table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {destinations.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="admin-dashboard__empty-cell">
+                      No destinations found.
+                    </td>
+                  </tr>
+                ) : (
+                  destinations.map((dest) => (
+                    <tr key={dest.id}>
+                      <td>#{dest.id}</td>
+                      <td>
+                        <img
+                          src={getDestinationImage(dest.image_key)}
+                          alt={dest.name}
+                          className="admin-dashboard__thumb"
+                        />
+                      </td>
+                      <td>
+                        <strong>{dest.name}</strong>
+                      </td>
+                      <td>
+                        <span className="admin-dashboard__category-badge">{dest.category}</span>
+                      </td>
+                      <td>
+                        <button
+                          className="admin-dashboard__delete-btn"
+                          onClick={() => handleDeleteDestination(dest.id)}
+                          type="button"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
   );

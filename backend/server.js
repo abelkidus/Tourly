@@ -244,11 +244,24 @@ app.post("/bookings", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "All booking fields are required" });
     }
 
+    const count = Number(travelersCount);
+    if (isNaN(count) || count < 1) {
+      return res.status(400).json({ message: "Travelers count must be at least 1" });
+    }
+
+    const bookingDate = new Date(travelDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isNaN(bookingDate.getTime()) || bookingDate < today) {
+      return res.status(400).json({ message: "Travel date cannot be in the past" });
+    }
+
     const result = await pool.query(
       `INSERT INTO bookings (user_id, destination_id, travelers_count, travel_date)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [req.user.id, destinationId, travelersCount, travelDate],
+      [req.user.id, destinationId, count, travelDate],
     );
 
     res.status(201).json({

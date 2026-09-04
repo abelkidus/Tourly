@@ -94,6 +94,8 @@ function Booking() {
     }
   };
 
+  const todayDate = new Date().toISOString().split("T")[0];
+
   return (
     <section className="booking">
       <div className="booking__panel">
@@ -136,6 +138,7 @@ function Booking() {
                 id="travelersCount"
                 name="travelersCount"
                 min="1"
+                max="20"
                 value={formData.travelersCount}
                 onChange={handleChange}
                 required
@@ -151,6 +154,7 @@ function Booking() {
                 type="date"
                 id="travelDate"
                 name="travelDate"
+                min={todayDate}
                 value={formData.travelDate}
                 onChange={handleChange}
                 required

@@ -35,7 +35,10 @@ function ProgramsSection() {
   if (loading) {
     return (
       <section className="programs" id="destinations">
-        <p className="programs__status">Loading destinations...</p>
+        <div className="programs__loading">
+          <div className="programs__spinner"></div>
+          <p className="programs__status">Loading destinations...</p>
+        </div>
       </section>
     );
   }

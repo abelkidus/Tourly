@@ -97,15 +97,25 @@ function BookingList() {
         <h1 className="bookings__title">{displayName ? `${displayName}'s trips` : "Your trips"}</h1>
         <p className="bookings__subtitle">Review the destinations you have booked and the dates you are planning to travel.</p>
 
-        {loading && <p className="bookings__status">Loading bookings...</p>}
+        {loading && (
+          <div className="bookings__loading">
+            <div className="bookings__spinner"></div>
+            <p className="bookings__status">Loading your bookings...</p>
+          </div>
+        )}
         {error && <p className="bookings__status bookings__status--error">{error}</p>}
 
         {!loading && !error && bookings.length === 0 && (
           <div className="bookings__empty">
             <p className="bookings__status">You do not have any bookings yet.</p>
-            <Link className="bookings__button" to="/booking">
-              Book now
-            </Link>
+            <div className="bookings__empty-actions">
+              <Link className="bookings__button" to="/">
+                Browse Destinations
+              </Link>
+              <Link className="bookings__button bookings__button--secondary" to="/booking">
+                Book a trip
+              </Link>
+            </div>
           </div>
         )}
 

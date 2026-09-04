@@ -115,16 +115,34 @@
   z-index: 1;
 }
 
+.programs__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+}
+
+.programs__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(125, 145, 84, 0.25);
+  border-top-color: #7d9154;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .programs__status {
   text-align: center;
   font-family: "Montserrat", sans-serif;
   font-size: 1.2rem;
   color: #5f615b;
-  padding: 40px 0;
 }
 
 .programs__status--error {
   color: #c53030;
+  padding: 40px 0;
 }
 
 .program-card__content {

@@ -33,10 +33,10 @@ function Booking() {
 
         setDestinations(data);
         if (data.length > 0) {
-          const match = preselectedDestinationId && data.find((d) => String(d.id) === String(preselectedDestinationId));
+          const selectedId = preselectedDestinationId || data[0].id;
           setFormData((current) => ({
             ...current,
-            destinationId: match ? String(match.id) : current.destinationId || String(data[0].id),
+            destinationId: String(selectedId),
           }));
         }
       } catch (err) {

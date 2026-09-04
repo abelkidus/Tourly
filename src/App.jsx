@@ -9,6 +9,7 @@ import BookingList from "./BookingList";
 import AdminDashboard from "./AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import NotFound from "./components/NotFound";
 
 function HomePage() {
   return (
@@ -58,6 +59,7 @@ function App() {
             </AdminRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

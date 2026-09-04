@@ -8,4 +8,22 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
 });
 
+pool.on("error", (err) => {
+  console.error("Unexpected idle database client error:", err);
+});
+
+async function testConnection() {
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log("Database connected successfully at:", res.rows[0].now);
+    return true;
+  } catch (err) {
+    console.error("Database connection failed on startup:", err.message);
+    return false;
+  }
+}
+
+pool.testConnection = testConnection;
+
 module.exports = pool;
+

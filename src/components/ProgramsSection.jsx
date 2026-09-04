@@ -34,7 +34,7 @@ function ProgramsSection() {
 
   if (loading) {
     return (
-      <section className="programs" id="destinations">
+      <section className="programs" id="programs">
         <div className="programs__loading">
           <div className="programs__spinner"></div>
           <p className="programs__status">Loading destinations...</p>
@@ -45,7 +45,7 @@ function ProgramsSection() {
 
   if (error) {
     return (
-      <section className="programs" id="destinations">
+      <section className="programs" id="programs">
         <p className="programs__status programs__status--error">{error}</p>
       </section>
     );
@@ -54,7 +54,7 @@ function ProgramsSection() {
   const categories = Array.from(new Set(destinations.map((d) => d.category || "Destinations")));
 
   return (
-    <section className="programs" id="destinations">
+    <section className="programs" id="programs">
       {categories.map((category, idx) => {
         const categoryDestinations = destinations.filter((d) => (d.category || "Destinations") === category);
 

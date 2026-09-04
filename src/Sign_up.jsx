@@ -5,6 +5,7 @@ import "./Sign_up.css";
 function Sign_up() {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
+  const maxBirthDate = new Date().toISOString().split("T")[0];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +19,11 @@ function Sign_up() {
       birthDate: e.target.bday.value,
       password: e.target.password.value,
     };
+
+    if (formData.birthDate && new Date(formData.birthDate) > new Date()) {
+      toast.error("Birth date cannot be in the future");
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/users/signup`, {
@@ -65,49 +71,65 @@ function Sign_up() {
             <label className="signup__label" htmlFor="fullname">
               Full name
             </label>
-            <input className="signup__input" type="text" name="fullname" id="fullname" />
+            <input className="signup__input" type="text" name="fullname" id="fullname" required minLength={3} />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="username">
               Username
             </label>
-            <input className="signup__input" type="text" name="username" id="username" />
+            <input
+              className="signup__input"
+              type="text"
+              name="username"
+              id="username"
+              required
+              pattern="^[a-z0-9_]{3,}$"
+              title="Lowercase letters, numbers, and underscores only (min 3 chars)"
+            />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="phone">
               Phone number
             </label>
-            <input className="signup__input" type="text" name="phone" id="phone" />
+            <input
+              className="signup__input"
+              type="tel"
+              name="phone"
+              id="phone"
+              required
+              pattern="^\+?[0-9]{10,15}$"
+              title="10 to 15 digits, optional leading +"
+            />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="email">
               Email address
             </label>
-            <input className="signup__input" type="email" name="email" id="email" />
+            <input className="signup__input" type="email" name="email" id="email" required />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="address">
               Address
             </label>
-            <input className="signup__input" type="text" name="address" id="address" />
+            <input className="signup__input" type="text" name="address" id="address" required minLength={4} />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="bday">
               Birth date
             </label>
-            <input className="signup__input" type="date" name="bday" id="bday" />
+            <input className="signup__input" type="date" name="bday" id="bday" required max={maxBirthDate} />
           </div>
 
           <div className="signup__field">
             <label className="signup__label" htmlFor="password">
               Password
             </label>
-            <input className="signup__input" type="password" name="password" id="password" />
+            <input className="signup__input" type="password" name="password" id="password" required minLength={8} />
           </div>
 
           <button className="signup__submit" type="submit">

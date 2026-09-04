@@ -106,8 +106,8 @@ function AdminDashboard() {
         throw new Error(data.message || "Failed to delete destination");
       }
 
-      toast.success("Destination deleted!");
-      fetchDestinations();
+      toast.success("Destination deleted");
+      setDestinations((prev) => prev.filter((dest) => dest.id !== id));
     } catch (err) {
       toast.error(err.message || "Failed to delete destination");
     }

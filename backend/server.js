@@ -348,6 +348,7 @@ app.delete("/bookings/:id", authenticateToken, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  await pool.testConnection();
 });

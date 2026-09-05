@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import DashboardLayout from "./components/DashboardLayout";
+import ConfirmModal from "./components/ConfirmModal";
 import "./bookingList.css";
 
 function BookingList() {
@@ -13,6 +14,8 @@ function BookingList() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -45,12 +48,16 @@ function BookingList() {
     fetchBookings();
   }, [API_URL, token]);
 
-  const handleCancelBooking = async (bookingId) => {
-    const confirmed = window.confirm("Are you sure you want to cancel this booking?");
-    if (!confirmed) return;
+  const handleCancelBooking = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setIsModalOpen(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!selectedBookingId) return;
 
     try {
-      const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+      const response = await fetch(`${API_URL}/bookings/${selectedBookingId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,9 +71,12 @@ function BookingList() {
       }
 
       toast.success("Booking cancelled");
-      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+      setBookings((prev) => prev.filter((booking) => booking.id !== selectedBookingId));
     } catch (err) {
       toast.error(err.message || "Could not cancel booking");
+    } finally {
+      setIsModalOpen(false);
+      setSelectedBookingId(null);
     }
   };
 
@@ -149,6 +159,15 @@ function BookingList() {
           )}
         </div>
       </section>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="Cancel Trip"
+        message="Are you sure you want to cancel this booking?"
+        onConfirm={confirmCancel}
+        onCancel={() => setIsModalOpen(false)}
+        confirmText="Yes, Cancel"
+      />
     </DashboardLayout>
   );
 }

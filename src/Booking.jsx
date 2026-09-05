@@ -15,6 +15,7 @@ function Booking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     destinationId: preselectedDestinationId || "",
     travelersCount: 1,
@@ -57,8 +58,39 @@ function Booking() {
     }));
   };
 
+  const validate = () => {
+    const newErrors = {};
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!formData.destinationId) {
+      newErrors.destinationId = "Please select a destination";
+    }
+
+    if (!formData.travelersCount || Number(formData.travelersCount) < 1) {
+      newErrors.travelersCount = "Travelers count must be at least 1";
+    } else if (Number(formData.travelersCount) > 20) {
+      newErrors.travelersCount = "Travelers count cannot exceed 20";
+    }
+
+    if (!formData.travelDate) {
+      newErrors.travelDate = "Travel date is required";
+    } else if (formData.travelDate < today) {
+      newErrors.travelDate = "Travel date cannot be in the past";
+    }
+
+    return newErrors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
     setIsSubmitting(true);
 
     try {
@@ -107,18 +139,17 @@ function Booking() {
         {error && <p className="booking__status booking__status--error">{error}</p>}
 
         {!loading && !error && (
-          <form className="booking__form" onSubmit={handleSubmit}>
+          <form className="booking__form" onSubmit={handleSubmit} noValidate>
             <div className="booking__field">
               <label className="booking__label" htmlFor="destinationId">
                 Destination
               </label>
               <select
-                className="booking__input"
+                className={`booking__input ${errors.destinationId ? "error-border" : ""}`}
                 id="destinationId"
                 name="destinationId"
                 value={formData.destinationId}
                 onChange={handleChange}
-                required
               >
                 {destinations.map((destination) => (
                   <option key={destination.id} value={destination.id}>
@@ -126,6 +157,7 @@ function Booking() {
                   </option>
                 ))}
               </select>
+              {errors.destinationId && <span className="error-text">{errors.destinationId}</span>}
             </div>
 
             <div className="booking__field">
@@ -133,7 +165,7 @@ function Booking() {
                 Travelers Count
               </label>
               <input
-                className="booking__input"
+                className={`booking__input ${errors.travelersCount ? "error-border" : ""}`}
                 type="number"
                 id="travelersCount"
                 name="travelersCount"
@@ -141,8 +173,8 @@ function Booking() {
                 max="20"
                 value={formData.travelersCount}
                 onChange={handleChange}
-                required
               />
+              {errors.travelersCount && <span className="error-text">{errors.travelersCount}</span>}
             </div>
 
             <div className="booking__field">
@@ -150,15 +182,15 @@ function Booking() {
                 Travel Date
               </label>
               <input
-                className="booking__input"
+                className={`booking__input ${errors.travelDate ? "error-border" : ""}`}
                 type="date"
                 id="travelDate"
                 name="travelDate"
                 min={todayDate}
                 value={formData.travelDate}
                 onChange={handleChange}
-                required
               />
+              {errors.travelDate && <span className="error-text">{errors.travelDate}</span>}
             </div>
 
             <div className="booking__actions">

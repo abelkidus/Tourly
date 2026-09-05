@@ -10,6 +10,7 @@ function AdminDashboard() {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [destinations, setDestinations] = useState([]);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -43,8 +44,38 @@ function AdminDashboard() {
     }));
   };
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name || !formData.name.trim()) {
+      newErrors.name = "Destination name is required";
+    }
+
+    if (!formData.category || !formData.category.trim()) {
+      newErrors.category = "Category is required";
+    }
+
+    if (!formData.imageKey || !formData.imageKey.trim()) {
+      newErrors.imageKey = "Image key is required";
+    }
+
+    if (!formData.description || !formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    return newErrors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
     setIsSubmitting(true);
 
     try {
@@ -55,10 +86,10 @@ function AdminDashboard() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name: formData.name,
-          category: formData.category,
-          description: formData.description,
-          imageKey: formData.imageKey,
+          name: formData.name.trim(),
+          category: formData.category.trim(),
+          description: formData.description.trim(),
+          imageKey: formData.imageKey.trim(),
         }),
       });
 
@@ -75,6 +106,7 @@ function AdminDashboard() {
         description: "",
         imageKey: "",
       });
+      setErrors({});
       fetchDestinations();
     } catch (submitError) {
       toast.error(submitError.message || "Failed to add destination");
@@ -117,26 +149,47 @@ function AdminDashboard() {
             {user?.fullName || user?.username || "Admin"}, add new places here for travelers to discover and book.
           </p>
 
-          <form className="admin-dashboard__form" onSubmit={handleSubmit}>
+          <form className="admin-dashboard__form" onSubmit={handleSubmit} noValidate>
             <div className="admin-dashboard__field">
               <label className="admin-dashboard__label" htmlFor="name">
                 Destination Name
               </label>
-              <input className="admin-dashboard__input" id="name" name="name" value={formData.name} onChange={handleChange} required />
+              <input
+                className={`admin-dashboard__input ${errors.name ? "error-border" : ""}`}
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              {errors.name && <span className="error-text">{errors.name}</span>}
             </div>
 
             <div className="admin-dashboard__field">
               <label className="admin-dashboard__label" htmlFor="category">
                 Category
               </label>
-              <input className="admin-dashboard__input" id="category" name="category" value={formData.category} onChange={handleChange} required />
+              <input
+                className={`admin-dashboard__input ${errors.category ? "error-border" : ""}`}
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+              />
+              {errors.category && <span className="error-text">{errors.category}</span>}
             </div>
 
             <div className="admin-dashboard__field">
               <label className="admin-dashboard__label" htmlFor="imageKey">
                 Image Key
               </label>
-              <input className="admin-dashboard__input" id="imageKey" name="imageKey" value={formData.imageKey} onChange={handleChange} required />
+              <input
+                className={`admin-dashboard__input ${errors.imageKey ? "error-border" : ""}`}
+                id="imageKey"
+                name="imageKey"
+                value={formData.imageKey}
+                onChange={handleChange}
+              />
+              {errors.imageKey && <span className="error-text">{errors.imageKey}</span>}
             </div>
 
             <div className="admin-dashboard__field">
@@ -144,13 +197,13 @@ function AdminDashboard() {
                 Description
               </label>
               <textarea
-                className="admin-dashboard__input admin-dashboard__input--textarea"
+                className={`admin-dashboard__input admin-dashboard__input--textarea ${errors.description ? "error-border" : ""}`}
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                required
               />
+              {errors.description && <span className="error-text">{errors.description}</span>}
             </div>
 
             <div className="admin-dashboard__actions">

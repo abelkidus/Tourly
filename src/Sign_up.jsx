@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./Sign_up.css";
@@ -6,6 +7,27 @@ function Sign_up() {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
   const maxBirthDate = new Date().toISOString().split("T")[0];
+
+  const [password, setPassword] = useState("");
+  const [passwordCriteria, setPasswordCriteria] = useState({
+    length: false,
+    upper: false,
+    lower: false,
+    number: false,
+    special: false,
+  });
+
+  const handlePasswordChange = (e) => {
+    const val = e.target.value;
+    setPassword(val);
+    setPasswordCriteria({
+      length: val.length >= 8,
+      upper: /[A-Z]/.test(val),
+      lower: /[a-z]/.test(val),
+      number: /[0-9]/.test(val),
+      special: /[^A-Za-z0-9]/.test(val),
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,7 +151,38 @@ function Sign_up() {
             <label className="signup__label" htmlFor="password">
               Password
             </label>
-            <input className="signup__input" type="password" name="password" id="password" required minLength={8} />
+            <input
+              className="signup__input"
+              type="password"
+              name="password"
+              id="password"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+              minLength={8}
+            />
+            <ul className="signup__password-criteria">
+              <li className={`signup__criterion ${passwordCriteria.length ? "signup__criterion--met" : "signup__criterion--unmet"}`}>
+                <span className="signup__criterion-icon">{passwordCriteria.length ? "✓" : "○"}</span>
+                At least 8 characters
+              </li>
+              <li className={`signup__criterion ${passwordCriteria.upper ? "signup__criterion--met" : "signup__criterion--unmet"}`}>
+                <span className="signup__criterion-icon">{passwordCriteria.upper ? "✓" : "○"}</span>
+                One uppercase letter
+              </li>
+              <li className={`signup__criterion ${passwordCriteria.lower ? "signup__criterion--met" : "signup__criterion--unmet"}`}>
+                <span className="signup__criterion-icon">{passwordCriteria.lower ? "✓" : "○"}</span>
+                One lowercase letter
+              </li>
+              <li className={`signup__criterion ${passwordCriteria.number ? "signup__criterion--met" : "signup__criterion--unmet"}`}>
+                <span className="signup__criterion-icon">{passwordCriteria.number ? "✓" : "○"}</span>
+                One number
+              </li>
+              <li className={`signup__criterion ${passwordCriteria.special ? "signup__criterion--met" : "signup__criterion--unmet"}`}>
+                <span className="signup__criterion-icon">{passwordCriteria.special ? "✓" : "○"}</span>
+                One special character
+              </li>
+            </ul>
           </div>
 
           <button className="signup__submit" type="submit">

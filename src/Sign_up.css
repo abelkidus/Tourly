@@ -137,6 +137,39 @@
   color: #1e5b4b;
 }
 
+.signup__password-criteria {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+
+.signup__criterion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7b8e88;
+  transition: color 150ms ease;
+}
+
+.signup__criterion-icon {
+  font-weight: 700;
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+}
+
+.signup__criterion--met {
+  color: #217d4f;
+  font-weight: 600;
+}
+
+.signup__criterion--unmet {
+  color: #7b8e88;
+}
+
 @media (max-width: 640px) {
   .signup {
     padding: 24px 16px;

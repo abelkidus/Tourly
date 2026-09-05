@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
+import DashboardLayout from "./components/DashboardLayout";
 import "./bookingList.css";
 
 function BookingList() {
@@ -91,71 +92,64 @@ function BookingList() {
   };
 
   return (
-    <section className="bookings">
-      <div className="bookings__panel">
-        <p className="bookings__eyebrow">Your Bookings</p>
-        <h1 className="bookings__title">{displayName ? `${displayName}'s trips` : "Your trips"}</h1>
-        <p className="bookings__subtitle">Review the destinations you have booked and the dates you are planning to travel.</p>
+    <DashboardLayout>
+      <section className="bookings">
+        <div className="bookings__panel">
+          <p className="bookings__eyebrow">Your Bookings</p>
+          <h1 className="bookings__title">{displayName ? `${displayName}'s trips` : "Your trips"}</h1>
+          <p className="bookings__subtitle">Review the destinations you have booked and the dates you are planning to travel.</p>
 
-        {loading && (
-          <div className="bookings__loading">
-            <div className="bookings__spinner"></div>
-            <p className="bookings__status">Loading your bookings...</p>
-          </div>
-        )}
-        {error && <p className="bookings__status bookings__status--error">{error}</p>}
-
-        {!loading && !error && bookings.length === 0 && (
-          <div className="bookings__empty">
-            <p className="bookings__status">You do not have any bookings yet.</p>
-            <div className="bookings__empty-actions">
-              <Link className="bookings__button" to="/">
-                Browse Destinations
-              </Link>
-              <Link className="bookings__button bookings__button--secondary" to="/booking">
-                Book a trip
-              </Link>
+          {loading && (
+            <div className="bookings__loading">
+              <div className="bookings__spinner"></div>
+              <p className="bookings__status">Loading your bookings...</p>
             </div>
-          </div>
-        )}
+          )}
+          {error && <p className="bookings__status bookings__status--error">{error}</p>}
 
-        {!loading && !error && bookings.length > 0 && (
-          <div className="bookings__list">
-            {bookings.map((booking) => (
-              <article className="bookings__card" key={booking.id}>
-                <div>
-                  <p className="bookings__category">{booking.destination_category}</p>
-                  <h2 className="bookings__destination">{booking.destination_name}</h2>
-                  <p className="bookings__description">{booking.destination_description}</p>
-                </div>
-                <div className="bookings__details">
-                  <span>{formatDate(booking.travel_date)}</span>
-                  <span>
-                    {booking.travelers_count} {Number(booking.travelers_count) === 1 ? "traveler" : "travelers"}
-                  </span>
-                  <button
-                    className="bookings__cancel-btn"
-                    onClick={() => handleCancelBooking(booking.id)}
-                    type="button"
-                  >
-                    Cancel Trip
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+          {!loading && !error && bookings.length === 0 && (
+            <div className="bookings__empty">
+              <p className="bookings__status">You do not have any bookings yet.</p>
+              <div className="bookings__empty-actions">
+                <Link className="bookings__button" to="/">
+                  Browse Destinations
+                </Link>
+                <Link className="bookings__button bookings__button--secondary" to="/booking">
+                  Book a trip
+                </Link>
+              </div>
+            </div>
+          )}
 
-        <div className="bookings__actions">
-          <Link className="bookings__button" to="/booking">
-            Book another trip
-          </Link>
-          <Link className="bookings__button bookings__button--secondary" to="/welcome">
-            Back to welcome
-          </Link>
+          {!loading && !error && bookings.length > 0 && (
+            <div className="bookings__list">
+              {bookings.map((booking) => (
+                <article className="bookings__card" key={booking.id}>
+                  <div>
+                    <p className="bookings__category">{booking.destination_category}</p>
+                    <h2 className="bookings__destination">{booking.destination_name}</h2>
+                    <p className="bookings__description">{booking.destination_description}</p>
+                  </div>
+                  <div className="bookings__details">
+                    <span>{formatDate(booking.travel_date)}</span>
+                    <span>
+                      {booking.travelers_count} {Number(booking.travelers_count) === 1 ? "traveler" : "travelers"}
+                    </span>
+                    <button
+                      className="bookings__cancel-btn"
+                      onClick={() => handleCancelBooking(booking.id)}
+                      type="button"
+                    >
+                      Cancel Trip
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </DashboardLayout>
   );
 }
 

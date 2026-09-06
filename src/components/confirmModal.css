@@ -1,0 +1,120 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-box {
+  width: min(100%, 460px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: 0 24px 60px rgba(23, 53, 47, 0.22);
+  text-align: left;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-title {
+  margin: 0 0 12px;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #17352f;
+  line-height: 1.25;
+}
+
+.modal-message {
+  margin: 0 0 28px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #3d5954;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.modal-btn:hover {
+  transform: translateY(-1px);
+}
+
+.modal-btn--cancel {
+  background: #eef4f1;
+  color: #2f6c60;
+}
+
+.modal-btn--cancel:hover {
+  background: #dfece7;
+  color: #17352f;
+}
+
+.modal-btn--confirm {
+  background: #17352f;
+  color: #f7f2e8;
+  box-shadow: 0 4px 12px rgba(23, 53, 47, 0.15);
+}
+
+.modal-btn--confirm:hover {
+  background: #224b42;
+  box-shadow: 0 8px 20px rgba(23, 53, 47, 0.25);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 24px 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-btn {
+    width: 100%;
+  }
+}

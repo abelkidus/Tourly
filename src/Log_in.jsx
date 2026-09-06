@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
@@ -8,6 +9,7 @@ function Log_in() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
+  const [errors, setErrors] = useState({});
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -44,9 +46,27 @@ function Log_in() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const username = e.target.username.value;
+    const password = e.target.password.value;
+
+    const newErrors = {};
+    if (!username || !username.trim()) {
+      newErrors.username = "Username is required";
+    }
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
     const formData = {
-      username: e.target.username.value,
-      password: e.target.password.value,
+      username: username.trim(),
+      password,
     };
 
     try {
@@ -85,19 +105,31 @@ function Log_in() {
         <h2 className="login__title">Pick up your travel plans where you left off.</h2>
         <p className="login__subtitle">Sign in to access saved itineraries, personalized destination ideas, and your Tourly account details.</p>
 
-        <form className="login__form" onSubmit={handleSubmit}>
+        <form className="login__form" onSubmit={handleSubmit} noValidate>
           <div className="login__field">
             <label className="login__label" htmlFor="username">
               Username
             </label>
-            <input className="login__input" type="text" name="username" id="username" required />
+            <input
+              className={`login__input ${errors.username ? "error-border" : ""}`}
+              type="text"
+              name="username"
+              id="username"
+            />
+            {errors.username && <span className="error-text">{errors.username}</span>}
           </div>
 
           <div className="login__field">
             <label className="login__label" htmlFor="password">
               Password
             </label>
-            <input className="login__input" type="password" name="password" id="password" required />
+            <input
+              className={`login__input ${errors.password ? "error-border" : ""}`}
+              type="password"
+              name="password"
+              id="password"
+            />
+            {errors.password && <span className="error-text">{errors.password}</span>}
           </div>
 
           <button className="login__submit" type="submit">

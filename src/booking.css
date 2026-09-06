@@ -128,6 +128,19 @@
   background: #cfddd8;
 }
 
+.error-border {
+  border: 2px solid red !important;
+  outline: none !important;
+}
+
+.error-text {
+  display: block;
+  font-size: 0.8rem;
+  color: red;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .booking__panel {
     padding: 28px 22px;

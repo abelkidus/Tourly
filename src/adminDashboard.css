@@ -1,16 +1,17 @@
 .admin-dashboard {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 32px 20px;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px 0;
 }
 
 .admin-dashboard__panel {
-  width: min(100%, 820px);
+  width: min(100%, 960px);
   padding: 40px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 24px 60px rgba(23, 53, 47, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 60px rgba(23, 53, 47, 0.12);
 }
 
 .admin-dashboard__eyebrow {
@@ -20,13 +21,6 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #2f6c60;
-}
-
-.admin-dashboard__actions-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 .admin-dashboard__title {
@@ -226,5 +220,18 @@
   text-align: center;
   padding: 32px 18px;
   color: #5f615b;
+}
+
+.error-border {
+  border: 2px solid red !important;
+  outline: none !important;
+}
+
+.error-text {
+  display: block;
+  font-size: 0.8rem;
+  color: red;
+  margin-top: 2px;
+  font-weight: 600;
 }
 

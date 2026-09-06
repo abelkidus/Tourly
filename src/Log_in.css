@@ -172,6 +172,19 @@
   color: #1e5b4b;
 }
 
+.error-border {
+  border: 2px solid red !important;
+  outline: none !important;
+}
+
+.error-text {
+  display: block;
+  font-size: 0.8rem;
+  color: red;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .login {
     padding: 24px 16px;

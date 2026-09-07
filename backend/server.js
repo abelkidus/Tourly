@@ -302,6 +302,25 @@ app.delete("/admin/users/:id", authenticateToken, requireAdmin, async (req, res)
   }
 });
 
+app.get("/admin/stats", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const [usersCount, destinationsCount, bookingsCount] = await Promise.all([
+      pool.query("SELECT COUNT(*) FROM users"),
+      pool.query("SELECT COUNT(*) FROM destinations"),
+      pool.query("SELECT COUNT(*) FROM bookings"),
+    ]);
+
+    res.status(200).json({
+      totalUsers: parseInt(usersCount.rows[0].count, 10),
+      totalDestinations: parseInt(destinationsCount.rows[0].count, 10),
+      totalBookings: parseInt(bookingsCount.rows[0].count, 10),
+    });
+  } catch (error) {
+    console.error("Fetch stats error:", error);
+    res.status(500).json({ message: "Server error while fetching stats" });
+  }
+});
+
 app.post("/bookings", authenticateToken, async (req, res) => {
   try {
     const { destinationId, travelersCount, travelDate } = req.body;

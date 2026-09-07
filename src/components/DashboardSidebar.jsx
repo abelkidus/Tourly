@@ -46,18 +46,18 @@ function DashboardSidebar() {
               <>
                 <li>
                   <NavLink
-                    to="/dashboard"
+                    to="/admin/home"
                     end
                     className={({ isActive }) =>
                       `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
                     }
                   >
-                    Admin Home
+                    Home
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to="/dashboard"
+                    to="/admin/destinations"
                     className={({ isActive }) =>
                       `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
                     }
@@ -67,12 +67,12 @@ function DashboardSidebar() {
                 </li>
                 <li>
                   <NavLink
-                    to="/dashboard#users"
+                    to="/admin/users"
                     className={({ isActive }) =>
                       `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
                     }
                   >
-                    View All Users
+                    Manage Users
                   </NavLink>
                 </li>
               </>

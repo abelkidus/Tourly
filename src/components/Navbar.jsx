@@ -43,7 +43,7 @@ function Navbar() {
               Hi, {user?.fullName || user?.username || "Traveler"}
             </span>
             {isAdmin && (
-              <Link to="/dashboard" className="navbar__link-item">
+              <Link to="/admin/home" className="navbar__link-item">
                 Dashboard
               </Link>
             )}

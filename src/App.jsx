@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import TopSection from "./components/TopSection";
 import ProgramsSection from "./components/ProgramsSection";
 import Sign_up from "./Sign_up";
@@ -6,7 +6,9 @@ import Log_in from "./Log_in";
 import Welcome from "./welcome";
 import Booking from "./Booking";
 import BookingList from "./BookingList";
+import AdminHome from "./AdminHome";
 import AdminDashboard from "./AdminDashboard";
+import AdminManageUsers from "./AdminManageUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import NotFound from "./components/NotFound";
@@ -52,13 +54,30 @@ function App() {
           }
         />
         <Route
-          path="/dashboard"
+          path="/admin/home"
+          element={
+            <AdminRoute>
+              <AdminHome />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/destinations"
           element={
             <AdminRoute>
               <AdminDashboard />
             </AdminRoute>
           }
         />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminManageUsers />
+            </AdminRoute>
+          }
+        />
+        <Route path="/dashboard" element={<Navigate to="/admin/home" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
@@ -66,4 +85,5 @@ function App() {
 }
 
 export default App;
+
 

@@ -168,13 +168,23 @@ function AdminDashboard() {
               <label className="admin-dashboard__label" htmlFor="category">
                 Category
               </label>
-              <input
+              <select
                 className={`admin-dashboard__input ${errors.category ? "error-border" : ""}`}
                 id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-              />
+              >
+                <option value="" disabled>
+                  Select a category
+                </option>
+                <option value="Adventure">Adventure</option>
+                <option value="Beach">Beach</option>
+                <option value="City">City</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Nature">Nature</option>
+                <option value="Worldwide">Worldwide</option>
+              </select>
               {errors.category && <span className="error-text">{errors.category}</span>}
             </div>
 

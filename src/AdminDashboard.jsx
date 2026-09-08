@@ -250,33 +250,39 @@ function AdminDashboard() {
                       </td>
                     </tr>
                   ) : (
-                    destinations.map((dest) => (
-                      <tr key={dest.id}>
-                        <td>#{dest.id}</td>
-                        <td>
-                          <img
-                            src={getDestinationImage(dest.image_key)}
-                            alt={dest.name}
-                            className="admin-dashboard__thumb"
-                          />
-                        </td>
-                        <td>
-                          <strong>{dest.name}</strong>
-                        </td>
-                        <td>
-                          <span className="admin-dashboard__category-badge">{dest.category}</span>
-                        </td>
-                        <td>
-                          <button
-                            className="admin-dashboard__delete-btn"
-                            onClick={() => handleDeleteDestination(dest.id)}
-                            type="button"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    destinations.map((dest) => {
+                      const imageSrc = dest.image_key?.startsWith("http")
+                        ? dest.image_key
+                        : getDestinationImage(dest.image_key);
+
+                      return (
+                        <tr key={dest.id}>
+                          <td>#{dest.id}</td>
+                          <td>
+                            <img
+                              src={imageSrc}
+                              alt={dest.name}
+                              className="admin-dashboard__thumb"
+                            />
+                          </td>
+                          <td>
+                            <strong>{dest.name}</strong>
+                          </td>
+                          <td>
+                            <span className="admin-dashboard__category-badge">{dest.category}</span>
+                          </td>
+                          <td>
+                            <button
+                              className="admin-dashboard__delete-btn"
+                              onClick={() => handleDeleteDestination(dest.id)}
+                              type="button"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

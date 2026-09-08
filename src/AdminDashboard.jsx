@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import { getDestinationImage } from "./utils/imageMapper";
 import DashboardLayout from "./components/DashboardLayout";
+import ConfirmModal from "./components/ConfirmModal";
 import "./adminDashboard.css";
 
 function AdminDashboard() {
@@ -13,6 +14,8 @@ function AdminDashboard() {
   const [destinations, setDestinations] = useState([]);
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDestId, setSelectedDestId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -119,11 +122,16 @@ function AdminDashboard() {
     }
   };
 
-  const handleDeleteDestination = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this destination?")) return;
+  const handleDeleteDestination = (id) => {
+    setSelectedDestId(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedDestId) return;
 
     try {
-      const response = await fetch(`${API_URL}/admin/destinations/${id}`, {
+      const response = await fetch(`${API_URL}/admin/destinations/${selectedDestId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -137,9 +145,12 @@ function AdminDashboard() {
       }
 
       toast.success("Destination deleted");
-      setDestinations((prev) => prev.filter((dest) => dest.id !== id));
+      setDestinations((prev) => prev.filter((dest) => dest.id !== selectedDestId));
     } catch (err) {
       toast.error(err.message || "Failed to delete destination");
+    } finally {
+      setIsModalOpen(false);
+      setSelectedDestId(null);
     }
   };
 
@@ -290,6 +301,18 @@ function AdminDashboard() {
           </div>
         </div>
       </section>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="Delete Destination"
+        message="Are you sure you want to delete this destination? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setSelectedDestId(null);
+        }}
+        confirmText="Delete"
+      />
     </DashboardLayout>
   );
 }

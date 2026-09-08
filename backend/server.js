@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { signupValidationRules, validateSignup } = require("./validator");
 const { authenticateToken, requireAdmin } = require("./middleware/auth");
+const upload = require("./middleware/upload");
 const { OAuth2Client } = require("google-auth-library");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -211,19 +212,25 @@ app.get("/destinations", async (req, res) => {
   }
 });
 
-app.post("/admin/destinations", authenticateToken, requireAdmin, async (req, res) => {
+app.post("/admin/destinations", authenticateToken, requireAdmin, upload.single("image"), async (req, res) => {
   try {
-    const { name, category, description, imageKey } = req.body;
+    const { name, category, description } = req.body;
 
-    if (!name || !category || !description || !imageKey) {
+    if (!req.file) {
+      return res.status(400).json({ message: "Image upload is required" });
+    }
+
+    if (!name || !category || !description) {
       return res.status(400).json({ message: "All destination fields are required" });
     }
+
+    const imageUrl = req.file.path;
 
     const result = await pool.query(
       `INSERT INTO destinations (name, category, description, image_key)
        VALUES ($1, $2, $3, $4)
        RETURNING id, name, category, description, image_key`,
-      [name, category, description, imageKey],
+      [name, category, description, imageUrl],
     );
 
     return res.status(201).json({

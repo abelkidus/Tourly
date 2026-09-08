@@ -1,21 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import { getDestinationImage } from "./utils/imageMapper";
 import DashboardLayout from "./components/DashboardLayout";
+import ConfirmModal from "./components/ConfirmModal";
 import "./adminDashboard.css";
 
 function AdminDashboard() {
   const { user, token } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
+  const fileInputRef = useRef(null);
 
   const [destinations, setDestinations] = useState([]);
   const [errors, setErrors] = useState({});
+  const [file, setFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDestId, setSelectedDestId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     description: "",
-    imageKey: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,8 +59,8 @@ function AdminDashboard() {
       newErrors.category = "Category is required";
     }
 
-    if (!formData.imageKey || !formData.imageKey.trim()) {
-      newErrors.imageKey = "Image key is required";
+    if (!file) {
+      newErrors.file = "Image upload is required";
     }
 
     if (!formData.description || !formData.description.trim()) {
@@ -79,18 +83,18 @@ function AdminDashboard() {
     setIsSubmitting(true);
 
     try {
+      const submitData = new FormData();
+      submitData.append("name", formData.name.trim());
+      submitData.append("category", formData.category.trim());
+      submitData.append("description", formData.description.trim());
+      submitData.append("image", file);
+
       const response = await fetch(`${API_URL}/admin/destinations`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          category: formData.category.trim(),
-          description: formData.description.trim(),
-          imageKey: formData.imageKey.trim(),
-        }),
+        body: submitData,
       });
 
       const data = await response.json();
@@ -104,8 +108,11 @@ function AdminDashboard() {
         name: "",
         category: "",
         description: "",
-        imageKey: "",
       });
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setErrors({});
       fetchDestinations();
     } catch (submitError) {
@@ -115,11 +122,16 @@ function AdminDashboard() {
     }
   };
 
-  const handleDeleteDestination = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this destination?")) return;
+  const handleDeleteDestination = (id) => {
+    setSelectedDestId(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedDestId) return;
 
     try {
-      const response = await fetch(`${API_URL}/admin/destinations/${id}`, {
+      const response = await fetch(`${API_URL}/admin/destinations/${selectedDestId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -133,9 +145,12 @@ function AdminDashboard() {
       }
 
       toast.success("Destination deleted");
-      setDestinations((prev) => prev.filter((dest) => dest.id !== id));
+      setDestinations((prev) => prev.filter((dest) => dest.id !== selectedDestId));
     } catch (err) {
       toast.error(err.message || "Failed to delete destination");
+    } finally {
+      setIsModalOpen(false);
+      setSelectedDestId(null);
     }
   };
 
@@ -168,28 +183,40 @@ function AdminDashboard() {
               <label className="admin-dashboard__label" htmlFor="category">
                 Category
               </label>
-              <input
+              <select
                 className={`admin-dashboard__input ${errors.category ? "error-border" : ""}`}
                 id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-              />
+              >
+                <option value="" disabled>
+                  Select a category
+                </option>
+                <option value="Adventure">Adventure</option>
+                <option value="Beach">Beach</option>
+                <option value="City">City</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Nature">Nature</option>
+                <option value="Worldwide">Worldwide</option>
+              </select>
               {errors.category && <span className="error-text">{errors.category}</span>}
             </div>
 
             <div className="admin-dashboard__field">
-              <label className="admin-dashboard__label" htmlFor="imageKey">
-                Image Key
+              <label className="admin-dashboard__label" htmlFor="image">
+                Destination Image
               </label>
               <input
-                className={`admin-dashboard__input ${errors.imageKey ? "error-border" : ""}`}
-                id="imageKey"
-                name="imageKey"
-                value={formData.imageKey}
-                onChange={handleChange}
+                ref={fileInputRef}
+                className={`admin-dashboard__input ${errors.file ? "error-border" : ""}`}
+                type="file"
+                id="image"
+                name="image"
+                accept="image/jpeg, image/png, image/webp"
+                onChange={(e) => setFile(e.target.files[0])}
               />
-              {errors.imageKey && <span className="error-text">{errors.imageKey}</span>}
+              {errors.file && <span className="error-text">{errors.file}</span>}
             </div>
 
             <div className="admin-dashboard__field">
@@ -234,33 +261,39 @@ function AdminDashboard() {
                       </td>
                     </tr>
                   ) : (
-                    destinations.map((dest) => (
-                      <tr key={dest.id}>
-                        <td>#{dest.id}</td>
-                        <td>
-                          <img
-                            src={getDestinationImage(dest.image_key)}
-                            alt={dest.name}
-                            className="admin-dashboard__thumb"
-                          />
-                        </td>
-                        <td>
-                          <strong>{dest.name}</strong>
-                        </td>
-                        <td>
-                          <span className="admin-dashboard__category-badge">{dest.category}</span>
-                        </td>
-                        <td>
-                          <button
-                            className="admin-dashboard__delete-btn"
-                            onClick={() => handleDeleteDestination(dest.id)}
-                            type="button"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    destinations.map((dest) => {
+                      const imageSrc = dest.image_key?.startsWith("http")
+                        ? dest.image_key
+                        : getDestinationImage(dest.image_key);
+
+                      return (
+                        <tr key={dest.id}>
+                          <td>#{dest.id}</td>
+                          <td>
+                            <img
+                              src={imageSrc}
+                              alt={dest.name}
+                              className="admin-dashboard__thumb"
+                            />
+                          </td>
+                          <td>
+                            <strong>{dest.name}</strong>
+                          </td>
+                          <td>
+                            <span className="admin-dashboard__category-badge">{dest.category}</span>
+                          </td>
+                          <td>
+                            <button
+                              className="admin-dashboard__delete-btn"
+                              onClick={() => handleDeleteDestination(dest.id)}
+                              type="button"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -268,6 +301,18 @@ function AdminDashboard() {
           </div>
         </div>
       </section>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="Delete Destination"
+        message="Are you sure you want to delete this destination? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setSelectedDestId(null);
+        }}
+        confirmText="Delete"
+      />
     </DashboardLayout>
   );
 }

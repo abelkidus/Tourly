@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const { signupValidationRules, validateSignup } = require("./validator");
 const { authenticateToken, requireAdmin } = require("./middleware/auth");
+const upload = require("./middleware/upload");
 const { OAuth2Client } = require("google-auth-library");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -211,19 +212,25 @@ app.get("/destinations", async (req, res) => {
   }
 });
 
-app.post("/admin/destinations", authenticateToken, requireAdmin, async (req, res) => {
+app.post("/admin/destinations", authenticateToken, requireAdmin, upload.single("image"), async (req, res) => {
   try {
-    const { name, category, description, imageKey } = req.body;
+    const { name, category, description } = req.body;
 
-    if (!name || !category || !description || !imageKey) {
+    if (!req.file) {
+      return res.status(400).json({ message: "Image upload is required" });
+    }
+
+    if (!name || !category || !description) {
       return res.status(400).json({ message: "All destination fields are required" });
     }
+
+    const imageUrl = req.file.path;
 
     const result = await pool.query(
       `INSERT INTO destinations (name, category, description, image_key)
        VALUES ($1, $2, $3, $4)
        RETURNING id, name, category, description, image_key`,
-      [name, category, description, imageKey],
+      [name, category, description, imageUrl],
     );
 
     return res.status(201).json({
@@ -262,6 +269,62 @@ app.delete("/admin/destinations/:id", authenticateToken, requireAdmin, async (re
   } catch (error) {
     console.error("Delete destination error:", error);
     res.status(500).json({ message: "Server error while deleting destination" });
+  }
+});
+
+app.get("/admin/users", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, full_name, username, email, role, created_at FROM users ORDER BY created_at DESC",
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Fetch users error:", error);
+    res.status(500).json({ message: "Server error while fetching users" });
+  }
+});
+
+app.delete("/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    if (Number(userId) === Number(req.user.id)) {
+      return res.status(400).json({ message: "You cannot delete your own account" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM users WHERE id = $1 RETURNING id",
+      [userId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ message: "Server error while deleting user" });
+  }
+});
+
+app.get("/admin/stats", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const [usersCount, destinationsCount, bookingsCount] = await Promise.all([
+      pool.query("SELECT COUNT(*) FROM users"),
+      pool.query("SELECT COUNT(*) FROM destinations"),
+      pool.query("SELECT COUNT(*) FROM bookings"),
+    ]);
+
+    res.status(200).json({
+      totalUsers: parseInt(usersCount.rows[0].count, 10),
+      totalDestinations: parseInt(destinationsCount.rows[0].count, 10),
+      totalBookings: parseInt(bookingsCount.rows[0].count, 10),
+    });
+  } catch (error) {
+    console.error("Fetch stats error:", error);
+    res.status(500).json({ message: "Server error while fetching stats" });
   }
 });
 

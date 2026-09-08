@@ -33,7 +33,7 @@ function Log_in() {
       if (response.ok) {
         login(data.token, data.user);
         toast.success("Welcome, " + (data.user.fullName || data.user.username || "Traveler"));
-        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome");
+        navigate(data.user.role === "admin" ? "/admin/home" : "/welcome");
       } else {
         toast.error(data.message || "Google login failed");
       }
@@ -83,7 +83,7 @@ function Log_in() {
       if (response.ok) {
         login(data.token, data.user);
         toast.success(data.message || "Login successful");
-        navigate(data.user.role === "admin" ? "/dashboard" : "/welcome");
+        navigate(data.user.role === "admin" ? "/admin/home" : "/welcome");
       } else {
         toast.error(data.message || "Login failed");
       }

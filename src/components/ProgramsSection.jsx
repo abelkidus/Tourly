@@ -69,7 +69,9 @@ function ProgramsSection() {
 
             <div className="program-cards">
               {categoryDestinations.map((dest) => {
-                const bgImage = getDestinationImage(dest.image_key);
+                const bgImage = dest.image_key?.startsWith("http")
+                  ? dest.image_key
+                  : getDestinationImage(dest.image_key);
 
                 return (
                   <article

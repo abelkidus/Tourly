@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
 import { getDestinationImage } from "./utils/imageMapper";
@@ -8,14 +8,15 @@ import "./adminDashboard.css";
 function AdminDashboard() {
   const { user, token } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
+  const fileInputRef = useRef(null);
 
   const [destinations, setDestinations] = useState([]);
   const [errors, setErrors] = useState({});
+  const [file, setFile] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     description: "",
-    imageKey: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,8 +56,8 @@ function AdminDashboard() {
       newErrors.category = "Category is required";
     }
 
-    if (!formData.imageKey || !formData.imageKey.trim()) {
-      newErrors.imageKey = "Image key is required";
+    if (!file) {
+      newErrors.file = "Image upload is required";
     }
 
     if (!formData.description || !formData.description.trim()) {
@@ -79,18 +80,18 @@ function AdminDashboard() {
     setIsSubmitting(true);
 
     try {
+      const submitData = new FormData();
+      submitData.append("name", formData.name.trim());
+      submitData.append("category", formData.category.trim());
+      submitData.append("description", formData.description.trim());
+      submitData.append("image", file);
+
       const response = await fetch(`${API_URL}/admin/destinations`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          category: formData.category.trim(),
-          description: formData.description.trim(),
-          imageKey: formData.imageKey.trim(),
-        }),
+        body: submitData,
       });
 
       const data = await response.json();
@@ -104,8 +105,11 @@ function AdminDashboard() {
         name: "",
         category: "",
         description: "",
-        imageKey: "",
       });
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setErrors({});
       fetchDestinations();
     } catch (submitError) {
@@ -189,17 +193,19 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-dashboard__field">
-              <label className="admin-dashboard__label" htmlFor="imageKey">
-                Image Key
+              <label className="admin-dashboard__label" htmlFor="image">
+                Destination Image
               </label>
               <input
-                className={`admin-dashboard__input ${errors.imageKey ? "error-border" : ""}`}
-                id="imageKey"
-                name="imageKey"
-                value={formData.imageKey}
-                onChange={handleChange}
+                ref={fileInputRef}
+                className={`admin-dashboard__input ${errors.file ? "error-border" : ""}`}
+                type="file"
+                id="image"
+                name="image"
+                accept="image/jpeg, image/png, image/webp"
+                onChange={(e) => setFile(e.target.files[0])}
               />
-              {errors.imageKey && <span className="error-text">{errors.imageKey}</span>}
+              {errors.file && <span className="error-text">{errors.file}</span>}
             </div>
 
             <div className="admin-dashboard__field">

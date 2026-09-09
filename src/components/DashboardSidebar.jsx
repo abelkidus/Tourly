@@ -85,7 +85,7 @@ function DashboardSidebar() {
                       `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
                     }
                   >
-                    My Dashboard
+                    Home
                   </NavLink>
                 </li>
                 <li>

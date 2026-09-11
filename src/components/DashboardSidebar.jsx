@@ -108,6 +108,16 @@ function DashboardSidebar() {
                     My Trips
                   </NavLink>
                 </li>
+                <li>
+                  <NavLink
+                    to="/profile"
+                    className={({ isActive }) =>
+                      `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
+                    }
+                  >
+                    Profile
+                  </NavLink>
+                </li>
               </>
             )}
           </ul>

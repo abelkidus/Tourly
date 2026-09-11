@@ -6,6 +6,7 @@ import Log_in from "./Log_in";
 import Welcome from "./welcome";
 import Booking from "./Booking";
 import BookingList from "./BookingList";
+import UserProfile from "./UserProfile";
 import AdminHome from "./AdminHome";
 import AdminDashboard from "./AdminDashboard";
 import AdminManageUsers from "./AdminManageUsers";
@@ -50,6 +51,14 @@ function App() {
           element={
             <ProtectedRoute>
               <BookingList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />

@@ -26,6 +26,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("tourly_user", JSON.stringify(userData));
   };
 
+  const updateUser = (userData) => {
+    setUser((prev) => {
+      const updated = { ...(prev || {}), ...userData };
+      localStorage.setItem("tourly_user", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -43,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     login,
+    updateUser,
     logout,
   };
 

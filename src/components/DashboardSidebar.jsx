@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./dashboardSidebar.css";
@@ -5,6 +6,7 @@ import "./dashboardSidebar.css";
 function DashboardSidebar() {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const [avatarError, setAvatarError] = useState(false);
 
   const handleSignOut = () => {
     logout();
@@ -23,6 +25,11 @@ function DashboardSidebar() {
 
   const displayName = user?.fullName || user?.username || "Traveler";
   const initials = getInitials(displayName);
+  const avatarUrl = user?.avatar_url || user?.avatarUrl;
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [avatarUrl]);
 
   return (
     <aside className="dashboard-sidebar">
@@ -34,11 +41,12 @@ function DashboardSidebar() {
 
         <div className="dashboard-sidebar__user">
           <div className="dashboard-sidebar__avatar">
-            {user?.avatar_url ? (
+            {avatarUrl && !avatarError ? (
               <img
-                src={user.avatar_url}
+                src={avatarUrl}
                 alt="Profile"
                 className="sidebar-avatar-img"
+                onError={() => setAvatarError(true)}
               />
             ) : (
               initials

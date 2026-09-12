@@ -5,7 +5,7 @@ import { useAuth } from "./context/AuthContext";
 import "./userProfile.css";
 
 function UserProfile() {
-  const { token, user, login } = useAuth();
+  const { token, user, updateUser, login } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
   const fileInputRef = useRef(null);
 
@@ -14,11 +14,13 @@ function UserProfile() {
     email: "",
     phone: "",
     address: "",
+    avatar_url: "",
     avatarUrl: "",
   });
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarImgError, setAvatarImgError] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -42,13 +44,24 @@ function UserProfile() {
           throw new Error(data.message || "Failed to load profile");
         }
 
+        const avatar = data.avatar_url || data.avatarUrl || "";
+
         setProfileData({
-          fullName: data.full_name || "",
+          fullName: data.full_name || data.fullName || "",
           email: data.email || "",
           phone: data.phone || "",
           address: data.address || "",
-          avatarUrl: data.avatar_url || "",
+          avatar_url: avatar,
+          avatarUrl: avatar,
         });
+
+        if (avatar && updateUser) {
+          updateUser({
+            avatar_url: avatar,
+            avatarUrl: avatar,
+            fullName: data.full_name || data.fullName || user?.fullName,
+          });
+        }
       } catch (err) {
         console.error("Error fetching profile:", err);
         toast.error(err.message || "Failed to load profile");
@@ -75,7 +88,11 @@ function UserProfile() {
 
   const displayName = profileData.fullName || user?.fullName || user?.username || "Traveler";
   const initials = getInitials(displayName);
-  const currentAvatar = profileData.avatarUrl || user?.avatar_url || user?.avatarUrl;
+  const currentAvatar = profileData.avatar_url || profileData.avatarUrl || user?.avatar_url || user?.avatarUrl;
+
+  useEffect(() => {
+    setAvatarImgError(false);
+  }, [currentAvatar]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -101,19 +118,26 @@ function UserProfile() {
         throw new Error(data.error || data.message || "Failed to upload avatar");
       }
 
-      const updatedAvatarUrl = data.user?.avatar_url;
+      const updatedAvatarUrl = data.user?.avatar_url || data.user?.avatarUrl;
 
       setProfileData((prev) => ({
         ...prev,
+        avatar_url: updatedAvatarUrl,
         avatarUrl: updatedAvatarUrl,
       }));
 
-      if (login && user) {
+      if (updateUser) {
+        updateUser({
+          avatar_url: updatedAvatarUrl,
+          avatarUrl: updatedAvatarUrl,
+          fullName: data.user?.full_name || data.user?.fullName || user?.fullName,
+        });
+      } else if (login && user) {
         login(token, {
           ...user,
           avatar_url: updatedAvatarUrl,
           avatarUrl: updatedAvatarUrl,
-          fullName: data.user?.full_name || user.fullName,
+          fullName: data.user?.full_name || data.user?.fullName || user?.fullName,
         });
       }
 
@@ -163,12 +187,19 @@ function UserProfile() {
 
       toast.success(data.message || "Profile updated successfully");
 
-      if (login && user) {
+      const updatedUserObj = {
+        fullName: data.user?.full_name || profileData.fullName,
+        full_name: data.user?.full_name || profileData.fullName,
+        avatar_url: data.user?.avatar_url || profileData.avatar_url,
+        avatarUrl: data.user?.avatar_url || profileData.avatarUrl,
+      };
+
+      if (updateUser) {
+        updateUser(updatedUserObj);
+      } else if (login && user) {
         login(token, {
           ...user,
-          fullName: data.user.full_name,
-          avatar_url: data.user.avatar_url || user.avatar_url,
-          avatarUrl: data.user.avatar_url || user.avatarUrl,
+          ...updatedUserObj,
         });
       }
     } catch (err) {
@@ -277,11 +308,12 @@ function UserProfile() {
                         }
                       }}
                     >
-                      {currentAvatar ? (
+                      {currentAvatar && !avatarImgError ? (
                         <img
                           src={currentAvatar}
                           alt={displayName}
                           className="user-profile__avatar-img"
+                          onError={() => setAvatarImgError(true)}
                         />
                       ) : (
                         <span className="user-profile__avatar-initials">{initials}</span>

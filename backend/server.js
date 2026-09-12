@@ -119,6 +119,8 @@ app.post("/users/login", authLimiter, async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatar_url: user.avatar_url || null,
+        avatarUrl: user.avatar_url || null,
       },
     });
   } catch (error) {
@@ -167,10 +169,10 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
       const fullName = payload.name || "Google User";
 
       const insertResult = await pool.query(
-        `INSERT INTO users (full_name, username, email, role)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, full_name, username, email, role`,
-        [fullName, username, payload.email, "user"],
+        `INSERT INTO users (full_name, username, email, role, avatar_url)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, full_name, username, email, role, avatar_url`,
+        [fullName, username, payload.email, "user", payload.picture || null],
       );
 
       user = insertResult.rows[0];
@@ -193,6 +195,8 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatar_url: user.avatar_url || null,
+        avatarUrl: user.avatar_url || null,
       },
     });
   } catch (error) {
@@ -204,7 +208,7 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
 app.get("/user/profile", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, full_name, username, email, phone, address, avatar_url, created_at FROM users WHERE id = $1",
+      "SELECT id, full_name, username, email, phone, address, avatar_url, role, created_at FROM users WHERE id = $1",
       [req.user.id],
     );
 
@@ -212,7 +216,20 @@ app.get("/user/profile", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(result.rows[0]);
+    const u = result.rows[0];
+    res.status(200).json({
+      id: u.id,
+      full_name: u.full_name,
+      fullName: u.full_name,
+      username: u.username,
+      email: u.email,
+      phone: u.phone,
+      address: u.address,
+      role: u.role,
+      avatar_url: u.avatar_url,
+      avatarUrl: u.avatar_url,
+      created_at: u.created_at,
+    });
   } catch (error) {
     console.error("Fetch profile error:", error);
     res.status(500).json({ message: "Server error while fetching profile" });
@@ -232,7 +249,7 @@ app.put("/user/profile", authenticateToken, async (req, res) => {
         `UPDATE users 
          SET full_name = $1, phone = $2, address = $3, avatar_url = $4 
          WHERE id = $5 
-         RETURNING id, full_name, username, email, phone, address, avatar_url, created_at`,
+         RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
         [fullName, phone, address, avatarUrl, req.user.id],
       );
     } else {
@@ -240,7 +257,7 @@ app.put("/user/profile", authenticateToken, async (req, res) => {
         `UPDATE users 
          SET full_name = $1, phone = $2, address = $3 
          WHERE id = $4 
-         RETURNING id, full_name, username, email, phone, address, avatar_url, created_at`,
+         RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
         [fullName, phone, address, req.user.id],
       );
     }
@@ -249,9 +266,22 @@ app.put("/user/profile", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const u = result.rows[0];
     res.status(200).json({
       message: "Profile updated successfully",
-      user: result.rows[0],
+      user: {
+        id: u.id,
+        fullName: u.full_name,
+        full_name: u.full_name,
+        username: u.username,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        role: u.role,
+        avatar_url: u.avatar_url,
+        avatarUrl: u.avatar_url,
+        created_at: u.created_at,
+      },
     });
   } catch (error) {
     console.error("Update profile error:", error);
@@ -265,21 +295,36 @@ app.put("/user/avatar", authenticateToken, upload.single("avatar"), async (req, 
       return res.status(400).json({ error: "No image file provided" });
     }
 
+    const uploadedUrl = req.file.path || req.file.secure_url || req.file.url;
+
     const result = await pool.query(
       `UPDATE users 
        SET avatar_url = $1 
        WHERE id = $2 
-       RETURNING id, full_name, username, email, phone, address, avatar_url`,
-      [req.file.path, req.user.id],
+       RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
+      [uploadedUrl, req.user.id],
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const u = result.rows[0];
     res.status(200).json({
       message: "Avatar updated successfully",
-      user: result.rows[0],
+      user: {
+        id: u.id,
+        fullName: u.full_name,
+        full_name: u.full_name,
+        username: u.username,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        role: u.role,
+        avatar_url: u.avatar_url,
+        avatarUrl: u.avatar_url,
+        created_at: u.created_at,
+      },
     });
   } catch (error) {
     console.error("Avatar upload error:", error);

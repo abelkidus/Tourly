@@ -83,6 +83,15 @@
   justify-content: center;
   font-weight: 700;
   font-size: 1rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dashboard-sidebar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .dashboard-sidebar__user-info {

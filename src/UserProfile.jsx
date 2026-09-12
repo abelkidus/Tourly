@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import DashboardLayout from "./components/DashboardLayout";
 import { useAuth } from "./context/AuthContext";
@@ -7,15 +7,18 @@ import "./userProfile.css";
 function UserProfile() {
   const { token, user, login } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
+  const fileInputRef = useRef(null);
 
   const [profileData, setProfileData] = useState({
     fullName: "",
     email: "",
     phone: "",
     address: "",
+    avatarUrl: "",
   });
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -44,6 +47,7 @@ function UserProfile() {
           email: data.email || "",
           phone: data.phone || "",
           address: data.address || "",
+          avatarUrl: data.avatar_url || "",
         });
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -57,6 +61,73 @@ function UserProfile() {
       fetchProfile();
     }
   }, [API_URL, token]);
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .trim()
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const displayName = profileData.fullName || user?.fullName || user?.username || "Traveler";
+  const initials = getInitials(displayName);
+  const currentAvatar = profileData.avatarUrl || user?.avatar_url || user?.avatarUrl;
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    setUploadingAvatar(true);
+
+    try {
+      const response = await fetch(`${API_URL}/user/avatar`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Failed to upload avatar");
+      }
+
+      const updatedAvatarUrl = data.user?.avatar_url;
+
+      setProfileData((prev) => ({
+        ...prev,
+        avatarUrl: updatedAvatarUrl,
+      }));
+
+      if (login && user) {
+        login(token, {
+          ...user,
+          avatar_url: updatedAvatarUrl,
+          avatarUrl: updatedAvatarUrl,
+          fullName: data.user?.full_name || user.fullName,
+        });
+      }
+
+      toast.success("Profile photo updated!");
+    } catch (err) {
+      console.error("Avatar upload error:", err);
+      toast.error("Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -96,6 +167,8 @@ function UserProfile() {
         login(token, {
           ...user,
           fullName: data.user.full_name,
+          avatar_url: data.user.avatar_url || user.avatar_url,
+          avatarUrl: data.user.avatar_url || user.avatarUrl,
         });
       }
     } catch (err) {
@@ -187,6 +260,95 @@ function UserProfile() {
                   <p className="user-profile__card-desc">
                     Update your personal details and contact information.
                   </p>
+                </div>
+
+                {/* Avatar Section */}
+                <div className="user-profile__avatar-section">
+                  <div className="user-profile__avatar-wrapper">
+                    <div
+                      className="user-profile__avatar"
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Click to change photo"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                    >
+                      {currentAvatar ? (
+                        <img
+                          src={currentAvatar}
+                          alt={displayName}
+                          className="user-profile__avatar-img"
+                        />
+                      ) : (
+                        <span className="user-profile__avatar-initials">{initials}</span>
+                      )}
+                      <div className="user-profile__avatar-overlay">
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                          <circle cx="12" cy="13" r="4" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      id="avatar-file-input"
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={handleAvatarUpload}
+                      className="user-profile__file-input"
+                    />
+                  </div>
+
+                  <div className="user-profile__avatar-info">
+                    <div className="user-profile__avatar-name">{displayName}</div>
+                    <div className="user-profile__avatar-hint">
+                      PNG, JPEG, or WEBP up to 5MB
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="user-profile__avatar-btn"
+                    >
+                      {uploadingAvatar ? (
+                        <>
+                          <span className="user-profile__avatar-spinner" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                            <circle cx="12" cy="13" r="4" />
+                          </svg>
+                          Change Photo
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <form onSubmit={handleProfileSubmit} className="user-profile__form">

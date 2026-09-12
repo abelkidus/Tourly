@@ -23,6 +23,7 @@ function DashboardSidebar() {
 
   const displayName = user?.fullName || user?.username || "Traveler";
   const initials = getInitials(displayName);
+  const avatarUrl = user?.avatar_url || user?.avatarUrl;
 
   return (
     <aside className="dashboard-sidebar">
@@ -33,7 +34,17 @@ function DashboardSidebar() {
         </Link>
 
         <div className="dashboard-sidebar__user">
-          <div className="dashboard-sidebar__avatar">{initials}</div>
+          <div className="dashboard-sidebar__avatar">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="dashboard-sidebar__avatar-img"
+              />
+            ) : (
+              initials
+            )}
+          </div>
           <div className="dashboard-sidebar__user-info">
             <span className="dashboard-sidebar__user-name">{displayName}</span>
             <span className="dashboard-sidebar__user-role">{isAdmin ? "Administrator" : "Traveler"}</span>

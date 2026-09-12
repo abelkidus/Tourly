@@ -87,9 +87,10 @@
   flex-shrink: 0;
 }
 
-.dashboard-sidebar__avatar-img {
-  width: 100%;
-  height: 100%;
+.sidebar-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   object-fit: cover;
   display: block;
 }

@@ -119,6 +119,8 @@ app.post("/users/login", authLimiter, async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatar_url: user.avatar_url || null,
+        avatarUrl: user.avatar_url || null,
       },
     });
   } catch (error) {
@@ -167,10 +169,10 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
       const fullName = payload.name || "Google User";
 
       const insertResult = await pool.query(
-        `INSERT INTO users (full_name, username, email, role)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, full_name, username, email, role`,
-        [fullName, username, payload.email, "user"],
+        `INSERT INTO users (full_name, username, email, role, avatar_url)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, full_name, username, email, role, avatar_url`,
+        [fullName, username, payload.email, "user", payload.picture || null],
       );
 
       user = insertResult.rows[0];
@@ -193,11 +195,182 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatar_url: user.avatar_url || null,
+        avatarUrl: user.avatar_url || null,
       },
     });
   } catch (error) {
     console.error("Google login error:", error);
     return res.status(500).json({ message: "Server error during Google login" });
+  }
+});
+
+app.get("/user/profile", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, full_name, username, email, phone, address, avatar_url, role, created_at FROM users WHERE id = $1",
+      [req.user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const u = result.rows[0];
+    res.status(200).json({
+      id: u.id,
+      full_name: u.full_name,
+      fullName: u.full_name,
+      username: u.username,
+      email: u.email,
+      phone: u.phone,
+      address: u.address,
+      role: u.role,
+      avatar_url: u.avatar_url,
+      avatarUrl: u.avatar_url,
+      created_at: u.created_at,
+    });
+  } catch (error) {
+    console.error("Fetch profile error:", error);
+    res.status(500).json({ message: "Server error while fetching profile" });
+  }
+});
+
+app.put("/user/profile", authenticateToken, async (req, res) => {
+  try {
+    const fullName = req.body.full_name !== undefined ? req.body.full_name : req.body.fullName;
+    const phone = req.body.phone;
+    const address = req.body.address;
+    const avatarUrl = req.body.avatar_url !== undefined ? req.body.avatar_url : req.body.avatarUrl;
+
+    let result;
+    if (avatarUrl !== undefined) {
+      result = await pool.query(
+        `UPDATE users 
+         SET full_name = $1, phone = $2, address = $3, avatar_url = $4 
+         WHERE id = $5 
+         RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
+        [fullName, phone, address, avatarUrl, req.user.id],
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE users 
+         SET full_name = $1, phone = $2, address = $3 
+         WHERE id = $4 
+         RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
+        [fullName, phone, address, req.user.id],
+      );
+    }
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const u = result.rows[0];
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: u.id,
+        fullName: u.full_name,
+        full_name: u.full_name,
+        username: u.username,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        role: u.role,
+        avatar_url: u.avatar_url,
+        avatarUrl: u.avatar_url,
+        created_at: u.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error while updating profile" });
+  }
+});
+
+app.put("/user/avatar", authenticateToken, upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
+    }
+
+    const uploadedUrl = req.file.path || req.file.secure_url || req.file.url;
+
+    const result = await pool.query(
+      `UPDATE users 
+       SET avatar_url = $1 
+       WHERE id = $2 
+       RETURNING id, full_name, username, email, phone, address, avatar_url, role, created_at`,
+      [uploadedUrl, req.user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const u = result.rows[0];
+    res.status(200).json({
+      message: "Avatar updated successfully",
+      user: {
+        id: u.id,
+        fullName: u.full_name,
+        full_name: u.full_name,
+        username: u.username,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        role: u.role,
+        avatar_url: u.avatar_url,
+        avatarUrl: u.avatar_url,
+        created_at: u.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Avatar upload error:", error);
+    res.status(500).json({ message: "Server error while updating avatar" });
+  }
+});
+
+app.put("/user/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new passwords are required" });
+    }
+
+    const userResult = await pool.query(
+      "SELECT password_hash FROM users WHERE id = $1",
+      [req.user.id],
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = userResult.rows[0];
+
+    if (!user.password_hash) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      "UPDATE users SET password_hash = $1 WHERE id = $2",
+      [newPasswordHash, req.user.id],
+    );
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error while updating password" });
   }
 });
 

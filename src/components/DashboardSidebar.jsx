@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./dashboardSidebar.css";
@@ -5,6 +6,7 @@ import "./dashboardSidebar.css";
 function DashboardSidebar() {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const [avatarError, setAvatarError] = useState(false);
 
   const handleSignOut = () => {
     logout();
@@ -23,6 +25,11 @@ function DashboardSidebar() {
 
   const displayName = user?.fullName || user?.username || "Traveler";
   const initials = getInitials(displayName);
+  const avatarUrl = user?.avatar_url || user?.avatarUrl;
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [avatarUrl]);
 
   return (
     <aside className="dashboard-sidebar">
@@ -33,7 +40,18 @@ function DashboardSidebar() {
         </Link>
 
         <div className="dashboard-sidebar__user">
-          <div className="dashboard-sidebar__avatar">{initials}</div>
+          <div className="dashboard-sidebar__avatar">
+            {avatarUrl && !avatarError ? (
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="sidebar-avatar-img"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              initials
+            )}
+          </div>
           <div className="dashboard-sidebar__user-info">
             <span className="dashboard-sidebar__user-name">{displayName}</span>
             <span className="dashboard-sidebar__user-role">{isAdmin ? "Administrator" : "Traveler"}</span>
@@ -85,7 +103,7 @@ function DashboardSidebar() {
                       `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
                     }
                   >
-                    My Dashboard
+                    Home
                   </NavLink>
                 </li>
                 <li>
@@ -106,6 +124,16 @@ function DashboardSidebar() {
                     }
                   >
                     My Trips
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/profile"
+                    className={({ isActive }) =>
+                      `dashboard-sidebar__link ${isActive ? "dashboard-sidebar__link--active" : ""}`
+                    }
+                  >
+                    Profile
                   </NavLink>
                 </li>
               </>

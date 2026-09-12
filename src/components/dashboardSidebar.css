@@ -33,6 +33,16 @@
   border-bottom: 1px solid rgba(195, 233, 220, 0.15);
 }
 
+.dashboard-sidebar__brand:hover,
+.dashboard-sidebar__logo:hover,
+.dashboard-sidebar__user:hover,
+.dashboard-sidebar__top a:hover,
+.sidebar-logo:hover,
+.sidebar-profile:hover,
+.sidebar-header a:hover {
+  text-decoration: none;
+}
+
 .dashboard-sidebar__logo {
   font-family: "Kaushan Script", cursive;
   font-size: 2.2rem;
@@ -73,6 +83,16 @@
   justify-content: center;
   font-weight: 700;
   font-size: 1rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .dashboard-sidebar__user-info {

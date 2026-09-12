@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     birth_date DATE,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) DEFAULT 'user',
+    avatar_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

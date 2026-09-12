@@ -204,7 +204,7 @@ app.post("/users/google-login", authLimiter, async (req, res) => {
 app.get("/user/profile", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, full_name, username, email, phone, address, created_at FROM users WHERE id = $1",
+      "SELECT id, full_name, username, email, phone, address, avatar_url, created_at FROM users WHERE id = $1",
       [req.user.id],
     );
 
@@ -224,14 +224,26 @@ app.put("/user/profile", authenticateToken, async (req, res) => {
     const fullName = req.body.full_name !== undefined ? req.body.full_name : req.body.fullName;
     const phone = req.body.phone;
     const address = req.body.address;
+    const avatarUrl = req.body.avatar_url !== undefined ? req.body.avatar_url : req.body.avatarUrl;
 
-    const result = await pool.query(
-      `UPDATE users 
-       SET full_name = $1, phone = $2, address = $3 
-       WHERE id = $4 
-       RETURNING id, full_name, username, email, phone, address`,
-      [fullName, phone, address, req.user.id],
-    );
+    let result;
+    if (avatarUrl !== undefined) {
+      result = await pool.query(
+        `UPDATE users 
+         SET full_name = $1, phone = $2, address = $3, avatar_url = $4 
+         WHERE id = $5 
+         RETURNING id, full_name, username, email, phone, address, avatar_url, created_at`,
+        [fullName, phone, address, avatarUrl, req.user.id],
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE users 
+         SET full_name = $1, phone = $2, address = $3 
+         WHERE id = $4 
+         RETURNING id, full_name, username, email, phone, address, avatar_url, created_at`,
+        [fullName, phone, address, req.user.id],
+      );
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "User not found" });

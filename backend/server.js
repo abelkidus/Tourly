@@ -259,6 +259,34 @@ app.put("/user/profile", authenticateToken, async (req, res) => {
   }
 });
 
+app.put("/user/avatar", authenticateToken, upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
+    }
+
+    const result = await pool.query(
+      `UPDATE users 
+       SET avatar_url = $1 
+       WHERE id = $2 
+       RETURNING id, full_name, username, email, phone, address, avatar_url`,
+      [req.file.path, req.user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Avatar updated successfully",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Avatar upload error:", error);
+    res.status(500).json({ message: "Server error while updating avatar" });
+  }
+});
+
 app.put("/user/change-password", authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
